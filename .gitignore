@@ -1,0 +1,13 @@
+*.aux
+*.lof
+*.log
+*.lol
+*.lot
+*.run.xml
+
+*.bbl
+*.bcf
+*.blg
+
+wordcount.txt
+main.pdf

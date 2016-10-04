@@ -1,0 +1,72 @@
+\documentclass[11pt,a4paper,twoside,notitlepage]{report}
+\usepackage[british]{babel} % British hyphenation patterns, etc.
+\usepackage{csquotes}
+\usepackage[T1]{fontenc}
+\usepackage[a4paper]{geometry}
+\usepackage{listings}
+\usepackage{titling}
+\usepackage[style=ieee,backend=biber]{biblatex}
+
+\addbibresource{references.bib}
+
+% Titlepage formatting
+\pretitle{\begin{center}\Huge\bfseries}
+\posttitle{\par\end{center}\vspace{0.5em}}
+\preauthor{\begin{center}\Large\ttfamily}
+\postauthor{\par\large\supervisor\end{center}}
+\predate{\par\large\centering}
+\postdate{\par\wordcount\par}
+
+\immediate\write18{texcount \jobname.tex -inc -1 -sum -out=wordcount.txt}
+\newcommand\wordcount{\small(\input{wordcount.txt}words, counted by \ttfamily{texcount})}
+%texcount -sub=section \jobname.tex  | grep "Section" | sed -e 's/+.*//' | sed
+%-n \thesection p > 'count.txt'
+
+\title{Binary Code Translation from Register to Stack based code}
+\author{Charles Pigott}
+\date{DRAFT \today}
+\newcommand\supervisor{Supervisor: Christopher Crispin-Bailey}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+%TC:group abstract 0 0
+\begin{abstract}
+	This project will require a strong affinity for machine level programming \&
+	architecture understanding. Programming is more than likely to be undertaken
+	in Java or C, depending upon the implementation platform. Competence in all
+	of these areas would be a benefit.
+
+	Transmeta are a US based company, who recently surprised the computer
+	architecture world by developing a chip which dynamically translates Intel
+	binary code into machine language instructions for another (highly optimised
+	RISC) CPU core.  In doing so it allows Intel code to execute in real-time
+	without recompilation, but using a (claimed) much more power efficient
+	processor architecture.
+
+	This project attempts to explore something related to the above experiment,
+	however the focus will be on translating code into potentially parallel
+	sections using a technique called microthreading. Choosing a relatively
+	simple register machine for which complier, assembler, and simulator (or
+	processor) are readily available would be a sensible approach. The project
+	will involve writing a translator algorithm in high level code, but if time
+	allows the translator can be –recoded in low-level code, or at least
+	optimised to be as streamlined as possible (the speed of translation is a
+	critical factor).
+\end{abstract}
+
+\listoffigures
+\listoftables
+\renewcommand*{\lstlistlistingname}{List of Listings}
+\lstlistoflistings%
+
+\cleardoublepage%
+%\part{Preliminaries}
+
+Blah blah blah\cite{GotoHarmful}
+
+\printbibliography%
+
+\end{document}
