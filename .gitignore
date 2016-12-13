@@ -4,10 +4,13 @@
 *.lol
 *.lot
 *.run.xml
+*.fls
+*.synctex.gz
 
 *.bbl
 *.bcf
 *.blg
 
+.sconsign.dblite
 wordcount.txt
 main.pdf
