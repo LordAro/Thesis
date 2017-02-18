@@ -68,107 +68,12 @@ possible (the speed of translation is a critical factor).
 
 \tableofcontents
 
-\chapter{Introduction}
-\section{Aims}
-This project aims to show that by converting code written for a simple
-register-based architecture or processor to a stack-based architecture,
-performance improvements can be found.
-
-\section{Limitations}
-Sourcing physical processors and the toolchains capable of running on both the
-register-based and stack-based architectures is difficult, as what exists
-already tends to be either years out of date, with only partial support, or does
-not exist on both platforms. As such, this project will seek to emulate the
-architectures instead.
-
-Since the architectures will be emulated, there are precious few advantages to
-continuing to use the architecture's native binary code, so this project will
-instead take in some form of the respective architecture's assembly language.
-
-\section{Statement of Ethics}
-This project does not have any ethical concerns. As Transmeta have already done
-a more advanced version of this project nearly two decades ago with their Crusoe
-processor, any implications of the results of this project will be unlikely to
-affect any commercial businesses. The software produced by this project will be
-released open-source once it is completed under a permissive licence, should
-anyone else want to take the project further.
-
-\section{Problem approach}
-
-\chapter{Literature Review}
-\section{Brief history of computer architectures}
-With the exception of Babbage's Analytical Engine, probably the earliest
-computer architecture formerly described is that of the EDVAC (Electronic
-Discrete Variable Automatic Computer), in 1945 by John von~Neumann in his
-incomplete `First Draft of a Report on the EDVAC'. In it, von~Neumann described
-a computer which is subdivided into six separate parts - Central Arithmetic
-(CA); Central Control (CC); Memory; Input; Output and External Memory (at the
-time, this was intended to be something like punched tape). These components
-were described using the human nervous sytem as an analogy, with the CA, CC \&
-Memory acting as associative (linking) neurons, the Input \& Output acting as
-sensory \& motor neurons respectively.
-Von~Neumann also wanted to keep the computer as simple as possible, so suggested
-that arithmetic operations (such as add and multiply) should not be overlapped,
-and performed only one digit at a time. He also noted that external input/output
-should first be placed into memory, rather than directly in/out of the CC or CA.
-This approach to laying out the components of a computer stuck, and the
-approximate idea is still used in modern processors today.\cite{FirstDraft}
-
-\subsection{Register machines}
-In the 1950s, logic gates and switches were largely implemented using the quite
-large vacuum tubes and discrete transistors. With technology improving,
-integrated circuits were invented, constructing logic components using layers of
-metal and oxides on polished silicon. Initially, these were only used to
-implement individual logic components for computers, replacing the diodes and
-resistors used before, until in 1971, Intel released the 4004 microprocessor.
-It was the first commercially available fully self contained microprocessor,
-with its circuitry fabricated using the new `silicon gate' technology which is
-why it was able to be designed and fabricated as one chip. It's worth noting
-that Intel as a company didn't have much faith in this product, opting to
-instead focus on its line of memory chips and partnering with a Japanese
-electronic calculator firm, Busicom, to help finance the project. Nonetheless,
-the 4004 was a huge success with 4004 being produced for 10 solid years and
-taking Intel to the giant in the computing world that it is
-today.\cite{Aspray1997Intel}
-
-\subsection{Stack machines}
-Using stacks as part of computation has been around almost as long as computing
-itself, with Zuse's Z4 making use of them for subroutines in
-1945.\cite{Speiser2000KZZ} These days stacks in computer architectures and
-instruction sets are nearly exclusively limited to stack frames, to give the
-ability to do context ``saving'' and ``loading'' with function calls, in favour
-of register based computation. However, there is a notable exception - the Java
-Virtual Machine (JVM) uses a stack-based bytecode as its underlying programming
-language.\cite{Schoeberl2005Design}
-
-Instead of having named registers to store values in as part of computations,
-stack machines use a stack data structure
-
-
-stack scheduling
-
-
-\section{Binary Translation}
-ibm binary translation
-
-transputer
-
-\subsection{Transmeta Crusoe}
-In 2000, Transmeta published a thing which was interesting\cite{TransmetaCodeMorph}
-
-\chapter{Problem Analysis}
-
-\chapter{Design and Implementation}
-\section{Register based architecture selection}
-z80 too complex, downgraded to (subset of) dcpu-16, toy cpu created by Markus
-Persson for a game
-\section{Stack based architecture selection}
-J5. probably.
-
-\chapter{Testing, Results and Evaluation}
-\section{Instruction count}
-
-\chapter{Conclusions}
+\input{01-introduction}
+\input{02-literature-review}
+\input{03-problem-analysis}
+\input{04-design-and-implementation}
+\input{05-testing-results-and-evaluation}
+\input{06-conclusions}
 
 \addcontentsline{toc}{chapter}{Bibliography}
 \printbibliography%

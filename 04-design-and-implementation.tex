@@ -1,0 +1,25 @@
+\chapter{Design and Implementation}
+
+An early decision to be made was to write emulators for the register \& stack
+machines chosen. Toolchains for `obscure' architectures such as the ones likely
+to be chosen tend to be rather limited in nature and either out-of-date, broken
+or both. Writing emulators for the architectures creates extra programming
+work, but means that the choices of programming language and style are much
+greater.
+
+It was then decided that to simplify the design, the program would be interpret
+assembly source code of the register \& stack architectures instead of running
+the compiled binary. Doing it this way is only an abstraction over actually
+reading the binaries, and skips out having to compile the source code and then
+decode it again. Relatively speaking, it would not be difficult to make a
+program that does this but was deemed unnecessary for the core part of this
+project, converting a register-based instruction set to a stack-based one.
+
+\section{Register based architecture selection}
+z80, picoblaze, dcpu-16 choices.
+z80 too complex, downgraded to (subset of) dcpu-16, toy cpu created by Markus
+Persson for a game
+\section{Stack based architecture selection}
+J5. probably.
+
+

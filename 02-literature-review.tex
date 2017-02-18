@@ -1,0 +1,62 @@
+\chapter{Literature Review}
+\section{Brief history of computer architectures}
+With the exception of Babbage's Analytical Engine, probably the earliest
+computer architecture formerly described is that of the EDVAC (Electronic
+Discrete Variable Automatic Computer), in 1945 by John von~Neumann in his
+incomplete `First Draft of a Report on the EDVAC'. In it, von~Neumann described
+a computer which is subdivided into six separate parts - Central Arithmetic
+(CA); Central Control (CC); Memory; Input; Output and External Memory (at the
+time, this was intended to be something like punched tape). These components
+were described using the human nervous sytem as an analogy, with the CA, CC \&
+Memory acting as associative (linking) neurons, the Input \& Output acting as
+sensory \& motor neurons respectively.
+Von~Neumann also wanted to keep the computer as simple as possible, so suggested
+that arithmetic operations (such as add and multiply) should not be overlapped,
+and performed only one digit at a time. He also noted that external input/output
+should first be placed into memory, rather than directly in/out of the CC or CA.
+This approach to laying out the components of a computer stuck, and the
+approximate idea is still used in modern processors today.\cite{FirstDraft}
+
+\subsection{Register machines}
+In the 1950s, logic gates and switches were largely implemented using the quite
+large vacuum tubes and discrete transistors. With technology improving,
+integrated circuits were invented, constructing logic components using layers of
+metal and oxides on polished silicon. Initially, these were only used to
+implement individual logic components for computers, replacing the diodes and
+resistors used before, until in 1971, Intel released the 4004 microprocessor.
+It was the first commercially available fully self contained microprocessor,
+with its circuitry fabricated using the new `silicon gate' technology which is
+why it was able to be designed and fabricated as one chip. It's worth noting
+that Intel as a company didn't have much faith in this product, opting to
+instead focus on its line of memory chips and partnering with a Japanese
+electronic calculator firm, Busicom, to help finance the project. Nonetheless,
+the 4004 was a huge success with 4004 being produced for 10 solid years and
+taking Intel to the giant in the computing world that it is
+today.\cite{Aspray1997Intel}
+
+\subsection{Stack machines}
+Using stacks as part of computation has been around almost as long as computing
+itself, with Zuse's Z4 making use of them for subroutines in
+1945.\cite{Speiser2000KZZ} These days stacks in computer architectures and
+instruction sets are nearly exclusively limited to stack frames, to give the
+ability to do context ``saving'' and ``loading'' with function calls, in favour
+of register based computation. However, there is a notable exception - the Java
+Virtual Machine (JVM) uses a stack-based bytecode as its underlying programming
+language.\cite{Schoeberl2005Design}
+
+Instead of having named registers to store values as part of computations, stack
+machines use a stack data structure
+
+
+stack scheduling
+
+
+\section{Binary Translation}
+ibm binary translation
+
+transputer
+
+\subsection{Transmeta Crusoe}
+In 2000, Transmeta published a thing which was interesting\cite{TransmetaCodeMorph}
+
+
