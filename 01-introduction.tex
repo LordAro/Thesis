@@ -1,8 +1,10 @@
-\chapter{Introduction}
+\chapter{Introduction}\label{ch:introduction}
 \section{Aims}
 This project aims to show that by converting code written for a simple
 register-based architecture or processor to a stack-based architecture,
-performance improvements can be found.
+performance improvements can be found. This will include an example
+implementation of translating code intended for a register-based architecture to
+run on a stack-based architecture.
 
 \section{Limitations}
 Sourcing physical processors and the toolchains capable of running on both the
@@ -24,4 +26,14 @@ released open-source once it is completed under a permissive licence, should
 anyone else want to take the project further.
 
 \section{Problem approach}
+Initially, relevant literature will be reviewed, focusing on the work done by
+Transmeta, but also covering computer architectures, code translation and stack
+optimisation (Chapter~\ref{ch:litreview}). The knowledge from this will be used
+to make a list of requirements for the implentation of the translation program
+(Chapter~\ref{ch:problemanalysis}). The program will then be designed and
+implemented, documenting the problems and solutions found along the way
+(Chapter~\ref{ch:designimplementation}). Once the implementation is complete, it
+will be tested appropriately and results will be recorded and evalulated
+(Chapter~\ref{ch:testingresults}). Finally, conclusions will be drawn and
+further work discussed (Chapter~\ref{ch:conclusions}).
 

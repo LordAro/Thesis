@@ -1,2 +1,37 @@
-\chapter{Problem Analysis}
+\chapter{Problem Analysis}\label{ch:problemanalysis}
+The program implementation should be broken down into a number of steps. First
+will be deciding on the source (register) and target (stack) architectures.  The
+first part of the implementation will be to implement emulators for the chosen
+architectures.  Some conversion routines for register to stack architectures
+will be then implemented. After this, the generated stack code will have
+optimisation techniques applied to it. Finally, suitable test programs will be
+written.
 
+\section{Requirements}
+The following is a codified list of required features for the implementation of
+the project:
+
+\begin{itemize}[noitemsep]
+  \item Fully functioning emulator for a register machine architecture
+  \item Fully functioning emulator for a stack machine architecture
+  \item Ability to generate stack code from register code
+\end{itemize}
+
+There are also a certain number of desirable features that are medium priority.
+If these are not implemented, they will be discussed in the further work section (Section~\ref{sec:furtherwork})
+
+\begin{itemize}[noitemsep]
+  \item Peephole optimisations on generated stack code
+  \item Koopman-style optimisations on generated stack code
+\end{itemize}
+
+There are also a few ``nice-to-have'' features, that are low priority and not
+all that important for the project to be deemed a `success'.
+
+\begin{itemize}[noitemsep]
+  \item Translation threshold --- like the TransMeta implementation, only
+  translate regions of code if they are executed more than a certain number of
+  times.
+  \item Ability to more easily visualise differences between handwritten and
+  generated code, e.g.\ graphs or running side-by-side.
+\end{itemize}

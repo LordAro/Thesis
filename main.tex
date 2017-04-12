@@ -2,12 +2,19 @@
 \usepackage[british]{babel} % British hyphenation patterns, etc.
 \usepackage{csquotes}
 \usepackage[T1]{fontenc}
+\usepackage{fontspec}
 \usepackage[final]{microtype}
 \usepackage[a4paper]{geometry}
 \usepackage{listings}
 \usepackage{titling}
 \usepackage[style=ieee,backend=biber]{biblatex}
 \usepackage{fancyvrb} % VerbatimInput
+\usepackage{tabularx}
+\usepackage{graphicx}
+\usepackage{floatrow}
+\usepackage{enumitem} % noitemsep
+\usepackage{tikz}
+\usetikzlibrary{chains,shapes,arrows,positioning,backgrounds}
 
 \newenvironment{changemargin}[2]{%
 \begin{list}{}{%
@@ -21,6 +28,8 @@
 \item[]}{\end{list}}
 
 \addbibresource{references.bib}
+
+\lstset{basicstyle=\small\ttfamily}
 
 % Titlepage formatting
 \pretitle{\begin{center}\Huge\bfseries}
@@ -46,6 +55,7 @@
 \maketitle
 
 %TC:group abstract 0 0
+%TC:group lstlisting 0 0
 \begin{abstract}
 Transmeta are a US based company, who recently surprised the computer
 architecture world by developing a chip which dynamically translates Intel
@@ -57,14 +67,14 @@ architecture.
 This project attempts to explore something related to the above experiment,
 however the focus will be on translating code into potentially parallel sections
 using a technique called microthreading. Choosing a relatively simple register
-machine for which complier, assembler, and simulator (or processor) are readily
+machine for which compiler, assembler, and simulator (or processor) are readily
 available would be a sensible approach. The project will involve writing a
 translator algorithm in high level code, but if time allows the translator can
-be –recoded in low-level code, or at least optimised to be as streamlined as
+be recoded in low-level code, or at least optimised to be as streamlined as
 possible (the speed of translation is a critical factor).
 \end{abstract}
 
-\cleardoublepage
+\cleardoublepage%
 
 \tableofcontents
 
@@ -79,8 +89,8 @@ possible (the speed of translation is a critical factor).
 \printbibliography%
 \clearpage
 
+%TC:ignore
 \appendix
-\chapter{DCPU-16 Specification}
-\VerbatimInput[fontsize=\footnotesize]{dcpu16.txt}
-
+\include{99-appendices}
+%TC:endignore
 \end{document}

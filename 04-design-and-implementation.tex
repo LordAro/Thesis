@@ -1,4 +1,4 @@
-\chapter{Design and Implementation}
+\chapter{Design and Implementation}\label{ch:designimplementation}
 
 An early decision to be made was to write emulators for the register \& stack
 machines chosen. Toolchains for `obscure' architectures such as the ones likely
@@ -15,11 +15,133 @@ decode it again. Relatively speaking, it would not be difficult to make a
 program that does this but was deemed unnecessary for the core part of this
 project, converting a register-based instruction set to a stack-based one.
 
-\section{Register based architecture selection}
-z80, picoblaze, dcpu-16 choices.
-z80 too complex, downgraded to (subset of) dcpu-16, toy cpu created by Markus
-Persson for a game
-\section{Stack based architecture selection}
-J5. probably.
+\section{Programming language choice}
+C++ is a systems programming language that is well known for it's hugely
+powerful templates for generic programming, its ability to use multiparadigm
+styles of programming and its high speed, with significant work being put into
+optimising compilers for the language. Using object-orientated-programming, the
+conversion routines can be built on top of one of the emulators, with little
+duplication of code.
+
+C++ does have some disadvantages however. Its (relatively) low-level nature and
+power makes it easy to make errors in programming and logic, and its compiler
+errors for templates are infamous for taking up many pages. In fact, C++'s own
+creator has been quoted as saying ``C makes it easy to shoot yourself in the
+foot; C++ makes it harder, but when you do it blows your whole leg off'' when
+comparing C++ to its parent language C. That said, modern C++ has been making
+big improvements to the language since 2011, with smart pointers, lambdas \&
+type deduction fixing many of the language's major criticisms.
+
+Some thought was put into other higher-level languages, such as Python, but as
+these languages are interpreted instead of compiled, they incur an inherent
+speed penalty by comparison which with a speed sensitive project such as this
+where the emulators need to complete executing instructions in a specified
+amount of time is not a thing that is desirable to be worrying about.
+
+With all this in mind, it was decided that existing familiarity with the C++
+language was important as were the benefits of not having to worry about the
+speed of the emulators themselves for development outweighed the disadvantages.
+
+\section{Architecture choices}
+An immediate shortlist of register architectures was drawn up, of the Z80, the
+Picoblaze, and the DCPU-16.
+
+The Zilog Z80 is a microprocessor introduced in 1976. It is 8-bit based with the
+capability to address 64KB of memory by means of combining its registers. An
+extremely popular processor during the 1980s, it is still produced to this day
+for uses in embedded systems. It has its own assembly language that has both
+register and stack elements. Xilinx's Picoblaze is a `soft processor core',
+meaning that isn't manufactured specially, rather is fabricated on an FPGA
+(field-programmable gate array) by the user. It uses an 8-bit RISC architecture,
+which makes it very simple to fabricate and run. The DCPU-16 isn't actually a
+real processor, and has never been produced. It is the invention of Markus
+Persson to be emulated as part of a game he was creating that never ended up
+getting finished, but there was significant interest in it, which means that
+there was many programs and emulators produced for the processor regardless.
+It's a 16-bit processor that has modularity in mind in the architecture --- the
+computer would `connect' to peripherals to do its IO instead of a more common
+console output interface.
+
+\noindent\begin{minipage}{0.5\textwidth}
+\begin{lstlisting}[caption={Z80 ASM},captionpos=b]
+      LD a, 0
+      LD (CURCOL), a
+      LD (CURROW), a
+      LD hl, text
+      B_CALL(_PutS)
+      RET
+text:
+      .db "Hello, world!", 0
+\end{lstlisting}%
+\end{minipage}%
+\noindent\begin{minipage}{0.5\textwidth}
+\begin{lstlisting}[caption={Picoblaze ASM},captionpos=b]
+module hello_world ;
+
+initial begin
+  $display ("Hello, world!");
+  #10 $finish;
+end
+
+endmodule
+\end{lstlisting}%
+\end{minipage}
+
+\begin{lstlisting}[caption={DCPU-16 ASM},captionpos=b]
+; Attach screen
+SET A, 0
+SET B, vram
+HWI 0
+
+SET J, 0
+
+:loop
+SET I, vram
+ADD I, J
+ADD [I], 0x2000
+ADD J, 1
+IFN J, 12
+    SET PC, loop
+
+:crash
+SET PC, crash
+
+:vram
+DAT "Hello, world!", 0
+\end{lstlisting}%
+
+As the Picoblaze is a soft-processor, it is separated into its ASM and Verilog
+components and you have to connect the processor's `wires' together yourself. It
+was decided that this would be too much boilerplate to be worth the effort, so
+the Picoblaze was discounted. After some initial emulator implementation for the
+Z80 processor, it was found that its ability to combine registers were not easy
+to implement in a good way in C++, so after some thought it was decided to
+continue with the DCPU-16 assembly language, after cutting it down to get rid of
+the peripherals part of the language which isn't necessary for this project.
+
+In terms of stack architectures, Forth, JVM bytecode, and J5 were shortlisted.
+
+Forth is a very early programming languages that dates from 1970, when stack
+machines were still common in everyday computing. It's a very simple compiled
+language that still finds uses today in embedded systems due to how easy it is
+to port to new systems, and its low memory overhead. J5 is a teaching stack
+language to introduce people to stack machines and their respective languages
+and it is very simple in that regard, drawing on ideas from various different
+actual stack languages.
+
+\noindent\begin{minipage}{0.5\textwidth}
+\begin{lstlisting}[caption={Forth ASM},captionpos=b]
+CR .( Hello, world!)
+\end{lstlisting}
+\end{minipage}%
+\noindent\begin{minipage}{0.5\textwidth}
+\begin{lstlisting}[caption={J5 ASM},captionpos=b]
+OUT "Hello, world!"
+\end{lstlisting}
+\end{minipage}
+
+\section{Emulator implementation}
+
+instruction cut down
 
 

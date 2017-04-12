@@ -1,0 +1,96 @@
+\chapter{DCPU-16 Specification}
+\VerbatimInput[fontsize=\footnotesize]{dcpu16.txt}
+\chapter{Simplified J5 Instruction Sheet}
+Transcribed from 2013 DACS Exam paper
+\subsubsection{Arithmetic \& Logical}
+\begingroup
+\ttfamily
+\begin{tabularx}{0.95\textwidth}{l X}
+  ADD & Add Top \& Next on stack together   (3,2) -> (5) \\
+  SUB & Subtract Top from Next on stack   (2,8) -> (6) \\
+  INC & Increment Top of stack \\
+  DEC & Decrement Top of stack \\
+  AND/OR/NOT/XOR & Combine Top \& Next in in logical operation \\
+  SHR & Shift Top of stack 1 bit to right \\
+  SHL & Shift Top of stack 1 bit to left \\
+\end{tabularx}
+\endgroup
+
+\subsubsection{Comparative}
+\begingroup
+\ttfamily
+\begin{tabularx}{0.95\textwidth}{l X}
+  TGT & Test Top greater than Next, set Zero flag to true or false* \\
+  TLT & Test Top less than Next, set Zero flag to true or false* \\
+  TEQ & Test Top equal to Next, set Zero flag to true or false* \\
+  TSZ & Test Top set to zero, set Zero flag to true or false* \\
+\end{tabularx}
+\endgroup
+
+\hfill*Note these do not destroy Top and Next when they are operated.
+
+\subsubsection{Other instructions}
+\begingroup
+\ttfamily
+\begin{tabularx}{0.95\textwidth}{l >{\raggedright\arraybackslash}X}
+  SSET n & Place an operand n on the stack \\
+  SET nn & Place an operand nn on the stack \\
+  LOAD & Take address from Top of stack, access location, put result on stack \\
+  STORE & Take Top as address, and Next as data, then write data to the address
+  \\
+  BRANCH nn & Unconditional relative branch of +/- nn bits \\
+  BRZERO nn & Conditional branch (taken if Zero Flag set) \\
+  IBRANCH & Indirect branch PC <= M[TOS] \\
+  CALL nn & Call to address nn \\
+  RETURN & Return from call \\
+  STOP & Causes Execution to halt \\
+\end{tabularx}
+\endgroup
+
+\subsubsection{Stack manipulations}
+\begingroup
+\ttfamily
+\begin{tabularx}{\textwidth}{l X r}
+  DROP & Drop an item from the Top of the stack & \\
+  DUP & Duplicate Top of stack & (X,Y) -> (X,X,Y) \\
+  SWAP & Swap Top and Next & (X,Y) -> (Y,X) \\
+  RSD3 & Rotate stack down three & (X,Y,Z) -> (Z,X,Y) \\
+  RSU3 & Rotate stack up three & (X,Y,Z) -> (Y,Z,X) \\
+  TUCK2 & Tuck copy of Top under 2nd item & (X,Y,Z) -> (X,Y,X,Z) \\
+  TUCK3 & Tuck copy of Top under 3rd item & (X,Y,Z) -> (X,Y,Z,X) \\
+  COPY3 & Copy 3rd stack item to Top of stack & \\
+  PUSH rr & Push register (F,LBR,GBR,VBA) onto stack & \\
+  POP rr & Pop register (F,LBR,GBR,VBA) from stack & \\
+\end{tabularx}
+\endgroup
+
+\subsubsection{Registers}
+The J5 has the usual stack registers, Top, Next, 3rd, etc, and also has Local
+Base Register (\textbf{LBR}), Global Base Register (\textbf{GBR}), Vector Base
+Address (\textbf{VBA}), and an F register containing the flags shown below.
+
+\vspace{10mm}
+
+\noindent\begin{minipage}[b]{0.5\linewidth}
+  \begin{tikzpicture}
+    \tikzstyle{every path}=[thick]
+    \edef\turingtapesize{0.7cm}
+    \tikzstyle{tmtape}=[draw,minimum size=\turingtapesize]
+
+    \begin{scope}[start chain=1 going right,node distance=0mm]
+      \node[on chain=1,tmtape,label=below:MSB] {I};
+      \node[on chain=1,tmtape]                 {M};
+      \node[on chain=1,tmtape]                 {};
+      \node[on chain=1,tmtape]                 {};
+      \node[on chain=1,tmtape]                 {};
+      \node[on chain=1,tmtape]                 {};
+      \node[on chain=1,tmtape]                 {Z};
+      \node[on chain=1,tmtape,label=below:LSB] {C};
+    \end{scope}
+  \end{tikzpicture}
+\end{minipage}%
+\noindent\begin{minipage}[b]{0.5\linewidth}
+  \textbf{C}-Carry Flag\@ \textbf{Z}-Zero Flag\\
+  \textbf{I}-Interrupt (1=Enable, 0=Disable)\\
+  \textbf{M}-Interrupt Mode (1=Vector, 0=Opcode)
+\end{minipage}

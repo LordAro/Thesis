@@ -1,0 +1,5 @@
+VerbEnvir
+{
+    verbatim comment listing lstlisting verbatimtab rawhtml errexam picture
+	texdraw filecontents pgfpicture tikzpicture minted
+}

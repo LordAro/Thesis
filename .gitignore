@@ -14,4 +14,4 @@
 
 .sconsign.dblite
 wordcount.txt
-main.pdf
+*.pdf
