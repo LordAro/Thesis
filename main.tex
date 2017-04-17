@@ -10,11 +10,16 @@
 \usepackage[style=ieee,backend=biber]{biblatex}
 \usepackage{fancyvrb} % VerbatimInput
 \usepackage{tabularx}
+\usepackage{booktabs} % top/midrule
 \usepackage{graphicx}
 \usepackage{floatrow}
+\usepackage{float}
 \usepackage{enumitem} % noitemsep
 \usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
 \usetikzlibrary{chains,shapes,arrows,positioning,backgrounds}
+\pgfplotsset{compat=1.14}
 
 \newenvironment{changemargin}[2]{%
 \begin{list}{}{%
@@ -29,7 +34,7 @@
 
 \addbibresource{references.bib}
 
-\lstset{basicstyle=\small\ttfamily}
+\lstset{basicstyle=\small\ttfamily,captionpos=b}
 
 % Titlepage formatting
 \pretitle{\begin{center}\Huge\bfseries}

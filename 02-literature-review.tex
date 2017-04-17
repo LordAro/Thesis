@@ -134,26 +134,36 @@ potentially disastrous results if they do not.\cite{Baker1991Stack}
 
 Koopman describes a method of optimisation of (generated) stack code that is
 able to remove 91\% to 100\% of redundant local variable accesses. This is
-achieved in 6 steps. First is processing the input, where the register code is
-converted to stack code, using local stack variables in place of registers. This
-also takes note of the parts of the code which are set and then never reused,
-marking them as `DEAD'. Next is a `code cleanup', which makes more use of the
-stack, converting from the local variables. This is then followed by a
-preliminary peephole optimisation. The fourth step is the stack scheduling
-stage. After this, another peephole optimisation pass is done, which is
-generally much more effective. The final step is code generation, where the
-appropriate machine instructions are generated. Koopman's `intra-block' stack
-scheduling algorithm tries to remove variable loads and stores by maintaining a
-copy on the stack, similar to ``register scheduling'' for register
-architectures. The end result is a quite significant optimisation of generated
-stack code.\cite{Koopman1995Preliminary}
+achieved in 4 optimisation steps, in addition to the input processing, basic
+register to stack converasion that begin the process and the code generation
+that ends it. The code conversion step uses local stack variables to replace
+registers, and also takes note of the parts of the code which are set and then
+never reused, marking them as `DEAD'.  Next is a `code cleanup', which makes
+more use of the stack, converting from the local variables. This is then
+followed by a preliminary peephole optimisation. Then stack scheduling is done,
+which uses a `intra-block' algorithm to examine each block of stack code
+(approximately in between labels and branches) which tries to remove memory
+loads and stores from the program by maintaining a copy on the stack, similar to
+``register scheduling'' for register architectures. This is finished with
+another peephole optimisation pass to clean up some redundancy produced by the
+stack scheduling. The end result is a quite significant optimisation of
+generated stack code.\cite{Koopman1995Preliminary}
 
 Following on from this, Bailey goes further and describes a way to optimise
 memory accesses across block boundaries. This algorithm works out which memory
 locations are used in adjacent `parent-child' (e.g.\ loops) blocks and
 duplicating them on the stack, rather than doing the expensive store and load
-operations.\cite{Bailey2000Inter}
+operations. In particular, this algorithm is able to optimise loop variables
+out of memory and onto the stack.\cite{Bailey2000Inter}
 
+Further work still was done by Shannon, who implemented a C compiler for an
+abstract stack machine. He implemented both Koopman \& Bailey's algorithms, and
+came up with his own ``global'' optimisations. These are an iteration on top of
+Bailey's algorithm in that it analyses the data-flow of the program (rather than
+just a region), and works out which registers are used where, pushing that data
+to the stack where possible. Shannon's results also show how different memory
+models can affect the performance of (optimised) stack code by varying the costs
+of different instructions.\cite{Shannon2006AC}
 
 \section{Binary Translation}
 

@@ -5,12 +5,105 @@ meaningful metric that can be taken from the results would be comparing
 instruction counts between the register program and the unoptimised and
 optimised stack programs.
 
-Testing will be done using programs based on the Standford Benchmarking Suite,
-which was also used by Koopman. This suite comprises of a bubble sort, matrix
-multiplication, perm, queens, quicksort, a prime sieve \& a towers of hanoi
-implementation.
+Testing will be done using a series of programs handwritten for the DCPU-16
+emulator. They vary between simple test programs (for compiler correctness) and
+full benchmarking programs.
+
+\section{Test suite}
+\begin{itemize}
+  \item \texttt{simple} --- Single addition test
+  \item \texttt{loop} --- Loop test
+  \item \texttt{redundant} --- Program with deliberately redundant register
+  usage
+  \item \texttt{bsort} --- Bubble sort benchmark. Sorts 32 integers and prints
+  the result
+  \item \texttt{fib20} --- Calculates and prints the first 20 fibonacci numbers
+  \item \texttt{primes} --- Uses a prime sieve to get all the prime numbers up
+  to 100
+\end{itemize}
+
+\section{Correctness}
+No significant automated testing of the implementation has been done. Instead
+the program's output was verified ``by eye'' and for the test run the multiple
+executions were compared against each other, to ensure consistent results.
 
 \section{Instruction count}
 
-magical graph goes here
+\pgfplotstableread[col sep=comma,header=false]{%
+bsort,24024,22343,22233
+fib20,665,608,606
+primes,6717,6619,6619
+}\tracedata%
 
+\pgfplotstableread[col sep=comma,header=false]{%
+bsort,7792,6703,6065
+fib20,234,196,175
+primes,1912,1912,1643
+}\tracememdata%
+
+
+\pgfplotsset{%
+  percentage series/.style={%
+    table/y expr=\thisrow{#1}/\thisrow{1},table/meta=#1
+  }
+}
+
+\begin{figure}
+\begin{tikzpicture}
+  \begin{axis}[
+    width=10cm,
+    ymajorgrids=true,
+    major x tick style = transparent,
+    major y tick style = transparent,
+    scaled y ticks = false,
+    ybar=0pt,
+    ymin=0.5,
+    bar width=0.75cm,
+    enlarge x limits=0.25,
+    symbolic x coords={bsort,fib20,primes},
+    xtick=data,
+    legend cell align=left,
+    legend style={%
+      at={(1.1,0.5)},
+      anchor=west,
+      column sep=1ex
+    }
+  ]
+  \addplot table [percentage series=1] {\tracedata};
+  \addplot table [percentage series=2] {\tracedata};
+  \addplot table [percentage series=3] {\tracedata};
+  \legend{Base,Peephole,Koopman}
+  \end{axis}
+\end{tikzpicture}
+\caption{Relative no.\ of instructions}
+\end{figure}
+
+\begin{figure}
+\begin{tikzpicture}
+  \begin{axis}[
+    width=10cm,
+    ymajorgrids=true,
+    major x tick style = transparent,
+    major y tick style = transparent,
+    scaled y ticks = false,
+    ybar=0pt,
+    ymin=0.5,
+    bar width=0.75cm,
+    enlarge x limits=0.25,
+    symbolic x coords={bsort,fib20,primes},
+    xtick=data,
+    legend cell align=left,
+    legend style={%
+      at={(1.1,0.5)},
+      anchor=west,
+      column sep=1ex
+    }
+  ]
+  \addplot table [percentage series=1] {\tracememdata};
+  \addplot table [percentage series=2] {\tracememdata};
+  \addplot table [percentage series=3] {\tracememdata};
+  \legend{Base,Peephole,Koopman}
+  \end{axis}
+\end{tikzpicture}
+\caption{Relative no.\ of LOAD/STORE instructions}
+\end{figure}

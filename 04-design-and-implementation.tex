@@ -63,7 +63,7 @@ computer would `connect' to peripherals to do its IO instead of a more common
 console output interface.
 
 \noindent\begin{minipage}{0.5\textwidth}
-\begin{lstlisting}[caption={Z80 ASM},captionpos=b]
+\begin{lstlisting}[caption={Z80 ASM}]
       LD a, 0
       LD (CURCOL), a
       LD (CURROW), a
@@ -75,8 +75,8 @@ text:
 \end{lstlisting}%
 \end{minipage}%
 \noindent\begin{minipage}{0.5\textwidth}
-\begin{lstlisting}[caption={Picoblaze ASM},captionpos=b]
-module hello_world ;
+\begin{lstlisting}[caption={Picoblaze ASM}]
+module hello_world;
 
 initial begin
   $display ("Hello, world!");
@@ -87,7 +87,8 @@ endmodule
 \end{lstlisting}%
 \end{minipage}
 
-\begin{lstlisting}[caption={DCPU-16 ASM},captionpos=b]
+\noindent\begin{minipage}{\linewidth} %prevent page break
+\begin{lstlisting}[caption={DCPU-16 ASM}]
 ; Attach screen
 SET A, 0
 SET B, vram
@@ -109,6 +110,7 @@ SET PC, crash
 :vram
 DAT "Hello, world!", 0
 \end{lstlisting}%
+\end{minipage}
 
 As the Picoblaze is a soft-processor, it is separated into its ASM and Verilog
 components and you have to connect the processor's `wires' together yourself. It
@@ -130,18 +132,360 @@ and it is very simple in that regard, drawing on ideas from various different
 actual stack languages.
 
 \noindent\begin{minipage}{0.5\textwidth}
-\begin{lstlisting}[caption={Forth ASM},captionpos=b]
+\begin{lstlisting}[caption={Forth ASM}]
 CR .( Hello, world!)
 \end{lstlisting}
 \end{minipage}%
 \noindent\begin{minipage}{0.5\textwidth}
-\begin{lstlisting}[caption={J5 ASM},captionpos=b]
+\begin{lstlisting}[caption={J5 ASM}]
 OUT "Hello, world!"
 \end{lstlisting}
 \end{minipage}
 
 \section{Emulator implementation}
+Early in the implementation, it was decided to cut down on the instructions that
+the emulators, as they were either esoteric or difficult to implement while
+being irrelevant to this project. In particular, none of the special opcodes for
+the DCPU-16 (see Appendix~\ref{ch:dcpuspec}) were implemented, and neither were
+the \lstinline{PUSH} or \lstinline{POP} identifiers, as they are used to
+implement a `reverse stack' starting at the top of the memory, 0xffff. Since
+this project tests converting register code to stack code, it doesn't make much
+sense to have most of a stack in the register architecture. This does exclude
+the possibility of having a call stack, with procedures or functions, but this
+is an acceptable compromise.
 
-instruction cut down
+Similarly, the J5 (see Appendix~\ref{ch:j5spec}) includes \lstinline{CALL nn} \&
+\lstinline{RETURN} instructions, so for feature parity it was decided to exclude
+these as well. The J5 also has a \lstinline{SSET n} function, which is intended
+as a fast version of \lstinline{SET nn} for small numbers. Since this is an
+emulator, this can be replaced with \lstinline{SET} quite trivially. However, if
+it were included, it would be a good target for optimisation, as since the
+operand is constant, it would be trivial to replae the \lstinline{SET}
+instruction with \lstinline{SSET} where appropriate.
+
+\subsection{Algorithms used}
+The general structure for both emulators is fairly similar. First the input
+file is read into memory. It is then iterated over, line-by-line, and tokenised
+into an intermediary representation, which serves to validate the input syntax.
+This can be approximated with the following psuedocode for the register
+architecture:
+
+\begin{lstlisting}[caption={Tokenising algorithm for the DCPU-16}]
+function tokenise(filepath: string): instruction
+  load file from filepath
+  For line in file do
+    instruction;
+    split line into words # words separated by whitespace
+    word = words[0]
+    If word is a label # is prefixed by a ':'
+      instruction.label = first word
+      word++
+    If word is not an opcode
+      return error "not a valid instruction"
+    instruction.code = word
+    word++
+
+    # opcodes take a variable number of operands
+    If number of operands for instruction.code != remaining_words
+      return error "invalid instruction" + instruction.opcode
+    instruction.operands = remaining words
+    return instruction
+  end
+\end{lstlisting}
+
+It was quite difficult to determine the type of the operands from the source.
+C++ in particular made it difficult due to its type system. The eventual
+solution was to use a variant (typesafe union) type to store integers (for
+literals), register references, and strings for everything else. The
+``everything else'' proved to be quite complicated as it included not only
+labels and string literals, but memory address lookups as well (e.g.
+\lstinline{SET [2000], 42}). For executing purposes it was possible to check if
+the string started and ended with `[' \& `]' respectively, and getting the value
+of the operand inside. This was further complicated as the DCPU-16 has the
+ability to use compound expressions inside the memory address brackets, e.g.
+\lstinline{[2000+I]} where the contents of the `I' register is added to 2000 to
+get the memory address referred to.
+
+A similar solution was done with the stack
+emulator.
+
+For running the emulators themselves, they provided a \lstinline{run} function,
+which is passed the tokenised program to run (along with any flags such as
+verbosity of output). It then initialises the machine's state and runs through
+each instruction in the program until terminated or it reaches the end.
+
+\begin{lstlisting}[caption={Running a DCPU-16 program}]
+procedure run(program: Program, flags..)
+  set registers to 0
+  program_counter = 0
+  while program_counter < sizeof(program)
+    run_instruction(program[program_counter])
+    program_counter++
+  end
+\end{lstlisting}
+
+The above is an overly simplistic view of the actual function though, which has
+the ability to run at a certain clock speed (to mimic the speed the actual
+processor would process instructions) or just as fast as the emulator can run,
+which is more useful for testing purposes. There's also a verbosity flag which
+dumps the state of the machine, for debugging purposes.
+
+The function loop also has to deal with the effects of the conditional
+expressions. For the DCPU-16 this is the \lstinline{IFx} statements where they
+only perform the next expression if the condition is true, whereas the the J5
+has some test instructions (e.g. \lstinline{TEQ}) and \lstinline{BRZERO}
+instruction which conditionally branches on whether the test instruction set the
+appropriate flag. The notable thing here is that the test instruction can be
+executed long before the branch is actually taken, which allows for more freedom
+over branching. It also has \lstinline{BRANCH} for unconditionally branching.
+
+\section{Conversion routines}
+Initially, the conversion was done all at once --- the program would take in a
+register program and output a stack program that could be run by the stack
+interpreter. This served well as an initial step, but to get to point of caching
+blocks of code, the implementation had to be changed first to converting one
+instruction at a time and then executing it as the stack machine all at once, to
+converting blocks of instructions and executing them. The process for this can
+be seen in Listing~\ref{convertcache}
+
+\begin{lstlisting}[label=convertcache,caption={Converted instruction
+caching},float]
+cache: map positions to stack code;
+function convert_instructions(start_pos: instruction)
+  If start_pos not in cache
+    last_pos = find next label
+    cache[start_pos] = convert_instructions(start_pos, last_pos)
+  return cache[start_pos]
+\end{lstlisting}
+
+Table~\ref{tab:conversionexs} is a table that shows some examples of the stack
+code produced for some register instructions.  By way of explanation, for the
+\lstinline{ADD A, B} row the code snippet first loads register A (represented
+by 8191) onto the stack, loading register B (8190) onto the stack, adding them
+together, and storing the result back into A. The DCPU-16's \lstinline{IFx}
+statements are more complex to convert as the J5 does not have a direct
+equivalent. The \lstinline{IFx} instruction only executes the next instruction
+if the condition (e.g. \lstinline{B != A} for \lstinline{IFN B, A}) evaluates to
+true. For the J5, its only conditional branching mechanism is \lstinline{BRZERO}
+and a series of `test' instructions, that have to be executed before hand and
+set a flag to signify whether its test is true or not. So, the conversion
+routine needs to load the operands for the statement onto the stack, test the
+operands on the stack, the drop the operands (so not to leave them ``dangling''
+on the stack regardless of the condition result), then \lstinline{BRZERO} with
+an operand that's equal to the generated length of the next instruction.
+Implementation-wise, it's necessary to leave a temporary value for the operand
+initially, then go back and change it once the next instruction has been
+converted.
+
+The implementation of this is particularly nice as the functions which load the
+instruction operands onto the stack (as in, e.g., \lstinline{ADD B, A}) were
+able to use one another, with minimal code duplication. For example, loading a
+register value onto the stack is just the same as loading an address onto the
+stack but with an extra \lstinline{LOAD} instruction following it. These segment
+functions allowed operands to be loaded onto the stack with no additional
+side effects. A complicated example of this can be seen with the
+\lstinline{SET A, [3000+I]} in Table~\ref{tab:conversionexs} that uses the
+DCPU-16's ability to have arithmetic operations inside memory addresses.
+
+\begin{table}
+\caption{Instruction conversion examples}
+\begin{tabular}{l l}\label{tab:conversionexs}
+Register instruction & Converted stack code \\ \toprule
+\begin{lstlisting}
+SET A, 5000
+\end{lstlisting} &
+\begin{lstlisting}
+SET 5000
+SET 8191
+STORE
+\end{lstlisting} \\ \midrule
+\begin{lstlisting}
+ADD A, B
+\end{lstlisting} &
+\begin{lstlisting}
+SET 8191
+LOAD
+SET 8190
+LOAD
+ADD
+SET 8191
+STORE
+\end{lstlisting} \\ \midrule
+\begin{lstlisting}
+SET PC, LOOP
+\end{lstlisting} &
+\begin{lstlisting}
+BRANCH LOOP
+\end{lstlisting} \\ \midrule
+\begin{lstlisting}
+IFN A, 0
+SET PC, LOOP
+\end{lstlisting} &
+\begin{lstlisting}
+SET 8191
+LOAD
+SET 0
+TEQ
+DROP
+DROP
+BRZERO 2
+BRANCH LOOP
+\end{lstlisting} \\ \midrule
+\begin{lstlisting}
+SET A, [3000+I]
+\end{lstlisting} &
+\begin{lstlisting}
+SET 3000
+SET 8185
+LOAD
+ADD
+LOAD
+SET 8191
+STORE
+\end{lstlisting} \\
+\end{tabular}
+\end{table}
 
 
+\section{Optimisation}
+Optimisation was done on the stack code generated by blocks of register
+instructions.
+
+\subsection{Peephole optimisation}
+A number of peephole optimisations were implemented as part of the optimisation
+process. A list of them can be seen in Table~\ref{tab:peepholeex}. While it has
+some affect just on its own, typically around the `edges' of generated stack
+code, it tends to have greater effect following a stack scheduling pass.
+
+The optimiser iterates over the program (which is again separated into regions
+by label) in blocks of a certain size that's determined by the individual
+optimisation. When it finds a block that matches the pattern that it's looking
+for, it replaces that block as defined by the optimisation.
+
+% Oh dear.
+\begin{table}
+\caption{Peephole optimisation examples}
+\begin{tabularx}{\linewidth}{l l X}\label{tab:peepholeex}
+Original stack code & Optimised stack code & Notes \\ \toprule
+\begin{lstlisting}^^J
+SET 1^^J
+ADD
+\end{lstlisting} &
+\begin{lstlisting}^^J
+INC
+\end{lstlisting} &
+Take advantage of the J5's {\lstinline!INC!} instruction \\ \midrule
+\begin{lstlisting}^^J
+SET 1^^J
+SUB
+\end{lstlisting} &
+\begin{lstlisting}^^J
+DEC
+\end{lstlisting} &
+Same as above, but for subtraction \\ \midrule
+\begin{lstlisting}^^J
+SET 0^^J
+TEQ^^J
+DROP
+\end{lstlisting} &
+\begin{lstlisting}^^J
+TSZ
+\end{lstlisting} &
+Generated with an {\lstinline!IFN, x, 0!} statement. Instead take advantage of
+the {\lstinline!TSZ!} instruction of the J5 \\ \midrule
+\begin{lstlisting}^^J
+SET x^^J
+STORE^^J
+SET x^^J
+LOAD
+\end{lstlisting} &
+\begin{lstlisting}^^J
+DUP^^J
+SET x^^J
+STORE
+\end{lstlisting} &
+A store followed by an immediate load of the same value. Instead, duplicate the
+stored value and just store (since it might be used elsewhere) \\ \midrule
+\begin{lstlisting}^^J
+DUP^^J
+SWAP
+\end{lstlisting} &
+\begin{lstlisting}^^J
+DUP
+\end{lstlisting} &
+Removes redundant swap \\ \midrule
+\begin{lstlisting}^^J
+SWAP^^J
+SWAP
+\end{lstlisting} &
+\begin{lstlisting}^^J
+<NOP>
+\end{lstlisting} &
+Removes redundant swaps \\ \midrule
+\begin{lstlisting}^^J
+SET x^^J
+DROP
+\end{lstlisting} &
+\begin{lstlisting}^^J
+<NOP>
+\end{lstlisting} &
+Removes redundant swaps \\ \bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Stack scheduling}
+Stack scheduling is relatively simple to implement and is described in
+pseudocode by Listing~\ref{lst:schedule}.
+
+\begin{lstlisting}[caption={Stack scheduling
+implementation},float,label=lst:schedule]
+
+pairs = []
+
+function get_stack_depth(pos)
+  return number of pairs such that p.i < pos and pos < p.j
+
+For ins = program.begin to program.end
+  if ins == SET and ins + 1 == STORE
+    For ins2 = ins + 2 to program.end
+      if ins2 == SET and ins2 + 1 == LOAD
+        # found a match
+        pairs.append({ins, ins2})
+        break ; don't include the same values more than once
+    end
+end
+sort pairs by distance (j-i) # so we apply tightest loops first
+For (i, j) in pairs
+  stack_depth = get_stack_depth(i)
+  if stack_depth > 2 or get_stack_depth(j) > 2
+    continue ; too deep in the stack to bring back to the top
+
+  if stack_depth == 0
+    ins = DUP
+  else if stack_depth == 1
+    ins = TUCK2
+  else if stack_depth == 2
+    ins = TUCK3
+
+  remove instructions at positions j and j+1
+  insert ins before position i
+
+  stack difference = net stack depth change between i and j
+  if stack difference == 0
+    # no op
+  else if stack difference == 1
+    insert SWAP after position j
+  else if stack difference == 2
+    insert RSD3 after position j
+
+  For p in remaining pairs
+    adjust i, j according to insertion/deletion change
+  end
+end
+\end{lstlisting}
+
+The key to the instruction that needs to be inserted at the ``reuse'' point to
+bring the instruction to the top of the stack depends on how many values have
+been added by instructions between its store point and its reuse point. This can
+be determined statically as all instructions have a known behaviour (whether
+they remove or add values to the stack).
