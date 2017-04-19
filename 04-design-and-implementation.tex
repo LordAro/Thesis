@@ -429,7 +429,7 @@ DROP
 \begin{lstlisting}^^J
 <NOP>
 \end{lstlisting} &
-Removes redundant swaps \\ \bottomrule
+Removes unused stack usage \\ \bottomrule
 \end{tabularx}
 \end{table}
 
@@ -489,3 +489,82 @@ bring the instruction to the top of the stack depends on how many values have
 been added by instructions between its store point and its reuse point. This can
 be determined statically as all instructions have a known behaviour (whether
 they remove or add values to the stack).
+
+An example of what this algorithm produces is listed in
+Table~\ref{tab:scheduleex}. It's worth nothing that even though the stack code
+produced by the stack scheduling is only 3 instructions shorter, it only
+contains 6 memory read/writes, compared to 10 for the initial unoptimised stack
+code which is a 40\% reduction.
+
+\begin{table}
+\caption{Stack scheduling example}
+\begin{tabular}{c c c}\label{tab:scheduleex}
+  Original register code & Initial stack code & Stack scheduled code
+  \\ \toprule
+\begin{lstlisting}
+; b = a + c
+SET A, 23
+SET C, 7
+ADD X, A
+ADD X, C
+SET B, X
+\end{lstlisting} &
+\begin{lstlisting}
+SET 23
+SET 8191
+STORE
+SET 7
+SET 8189
+STORE
+SET 8188
+LOAD
+SET 8191
+LOAD
+ADD
+SET 8188
+STORE
+SET 8188
+LOAD
+SET 8189
+LOAD
+ADD
+SET 8188
+STORE
+SET 8188
+LOAD
+SET 8190
+STORE
+\end{lstlisting} &
+\begin{lstlisting}
+SET 23
+DUP
+SET 8191
+STORE
+SET 7
+TUCK2
+SET 8189
+STORE
+SET 8188
+LOAD
+SWAP
+ADD
+DUP
+SET 8188
+STORE
+ADD
+DUP
+SET 8188
+STORE
+SET 8190
+STORE
+\end{lstlisting} \\
+\end{tabular}
+\end{table}
+
+Due to the na{\"\i}vity of how the blocks are determined (splitting on labels),
+if a loop doesn't have any following labels code following the loop can be
+included in the block. This causes issues with the stack-scheduling optimiser as
+it may find pairs of STORE/LOAD which are actually outside the block. Due to
+time-constraints it was not possible to implement a better block-finding
+algorithm, so a workaround is to add an (unused) label at the actual logical end
+of the block.

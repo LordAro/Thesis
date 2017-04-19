@@ -7,103 +7,252 @@ optimised stack programs.
 
 Testing will be done using a series of programs handwritten for the DCPU-16
 emulator. They vary between simple test programs (for compiler correctness) and
-full benchmarking programs.
+full benchmarking programs. The test programs were purely for verifying
+emulator \& optimiser correctness and will not be discussed in further detail.
 
-\section{Test suite}
-\begin{itemize}
+\begin{itemize}[noitemsep]
   \item \texttt{simple} --- Single addition test
   \item \texttt{loop} --- Loop test
   \item \texttt{redundant} --- Program with deliberately redundant register
   usage
+    \vspace{2ex}
   \item \texttt{bsort} --- Bubble sort benchmark. Sorts 32 integers and prints
   the result
   \item \texttt{fib20} --- Calculates and prints the first 20 fibonacci numbers
   \item \texttt{primes} --- Uses a prime sieve to get all the prime numbers up
   to 100
+  \item \texttt{tri100} --- Outputs the first 100 triangle numbers, using the
+    addition formula
 \end{itemize}
 
-\section{Correctness}
-No significant automated testing of the implementation has been done. Instead
-the program's output was verified ``by eye'' and for the test run the multiple
-executions were compared against each other, to ensure consistent results.
+\section{Results}
 
-\section{Instruction count}
+\begin{table}
+  \begin{tabular}{r r r r}
+                    &   Base & Peephole & Koopman \\ \toprule
+    \texttt{bsort}  &  24024 &    22343 &   22233 \\ \midrule
+    \texttt{fib20}  &    665 &      608 &     606 \\ \midrule
+    \texttt{primes} &   6717 &     6619 &    6619 \\ \midrule
+    \texttt{tri100} & 111381 &   106332 &  106332 \\ \midrule
+  \end{tabular}
+  \caption{No.\ of instructions executed}\label{tab:instructions}
+\end{table}
+
+\begin{table}
+  \begin{tabular}{r r r r}
+                    &  Base & Peephole & Koopman \\ \toprule
+    \texttt{bsort}  &  7792 &     6703 &    6065 \\ \midrule
+    \texttt{fib20}  &   234 &      196 &     175 \\ \midrule
+    \texttt{primes} &  1912 &     1912 &    1643 \\ \midrule
+    \texttt{tri100} & 35345 &    35345 &   30296 \\
+  \end{tabular}
+  \caption{No.\ of LOAD/STORE instructions executed}\label{tab:meminstructions}
+\end{table}
 
 \pgfplotstableread[col sep=comma,header=false]{%
 bsort,24024,22343,22233
 fib20,665,608,606
 primes,6717,6619,6619
+tri100,111381,106332,106332
 }\tracedata%
 
 \pgfplotstableread[col sep=comma,header=false]{%
 bsort,7792,6703,6065
 fib20,234,196,175
 primes,1912,1912,1643
+tri100,35345,35345,30296
 }\tracememdata%
 
-
 \pgfplotsset{%
-  percentage series/.style={%
-    table/y expr=\thisrow{#1}/\thisrow{1},table/meta=#1
+  relative series/.style={%
+    table/y expr=\thisrow{#1}/\thisrow{1},
+    table/meta=#1
+  },
+  relative graph/.style={%
+    width=13cm,
+    ymajorgrids=true,
+    major x tick style = transparent,
+    major y tick style = transparent,
+    scaled y ticks = false,
+    ybar=0pt,
+    ymin=0.5,
+    bar width=0.75cm,
+    enlarge x limits=0.2,
+    symbolic x coords={bsort,fib20,primes,tri100},
+    xtick=data,
+    legend cell align=left,
+    legend style={%
+      at={(1,0)},
+      anchor=south west,
+      column sep=1ex
+    }
   }
 }
 
 \begin{figure}
-\begin{tikzpicture}
-  \begin{axis}[
-    width=10cm,
-    ymajorgrids=true,
-    major x tick style = transparent,
-    major y tick style = transparent,
-    scaled y ticks = false,
-    ybar=0pt,
-    ymin=0.5,
-    bar width=0.75cm,
-    enlarge x limits=0.25,
-    symbolic x coords={bsort,fib20,primes},
-    xtick=data,
-    legend cell align=left,
-    legend style={%
-      at={(1.1,0.5)},
-      anchor=west,
-      column sep=1ex
-    }
-  ]
-  \addplot table [percentage series=1] {\tracedata};
-  \addplot table [percentage series=2] {\tracedata};
-  \addplot table [percentage series=3] {\tracedata};
-  \legend{Base,Peephole,Koopman}
-  \end{axis}
-\end{tikzpicture}
-\caption{Relative no.\ of instructions}
+  \begin{tikzpicture}
+    \begin{axis}[relative graph]
+      \addplot table [relative series=1] {\tracedata};
+      \addplot table [relative series=2] {\tracedata};
+      \addplot table [relative series=3] {\tracedata};
+      \legend{Base,Peephole,Koopman}
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Relative no.\ of instructions executed}\label{fig:relativeinstructions}
 \end{figure}
 
 \begin{figure}
-\begin{tikzpicture}
-  \begin{axis}[
-    width=10cm,
-    ymajorgrids=true,
-    major x tick style = transparent,
-    major y tick style = transparent,
-    scaled y ticks = false,
-    ybar=0pt,
-    ymin=0.5,
-    bar width=0.75cm,
-    enlarge x limits=0.25,
-    symbolic x coords={bsort,fib20,primes},
-    xtick=data,
-    legend cell align=left,
-    legend style={%
-      at={(1.1,0.5)},
-      anchor=west,
-      column sep=1ex
-    }
-  ]
-  \addplot table [percentage series=1] {\tracememdata};
-  \addplot table [percentage series=2] {\tracememdata};
-  \addplot table [percentage series=3] {\tracememdata};
-  \legend{Base,Peephole,Koopman}
-  \end{axis}
-\end{tikzpicture}
-\caption{Relative no.\ of LOAD/STORE instructions}
+  \begin{tikzpicture}
+    \begin{axis}[relative graph]
+      \addplot table [relative series=1] {\tracememdata};
+      \addplot table [relative series=2] {\tracememdata};
+      \addplot table [relative series=3] {\tracememdata};
+      \legend{Base,Peephole,Koopman}
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Relative no.\ of LOAD/STORE instructions executed}\label{fig:relativememinstructions}
 \end{figure}
+
+Tables~\ref{tab:instructions} \&~\ref{tab:meminstructions} represent the number
+of instructions executed for a complete run of the benchmark programs, and the
+number of LOAD/STORE operations for each of them for the same run, respectively.
+Figures~\ref{fig:relativeinstructions} \&~\ref{fig:relativememinstructions}
+graph the relative decrease in the number of instructions executed for each
+optimisation level, where no optimisations is the base level at one.
+
+\begin{table}
+\begin{tabular}{l l r r r r}
+  Program & Block & Register & Stack & Peephole & Koopman \\ \toprule
+  \multirow{6}{*}{\texttt{bsort}}  & & 34 & 103 & 102 & 102 \\
+  & \texttt{LOOP}                    &  2 &   9 &   8 &   8 \\
+  & \texttt{LOOP2}                   &  5 &  25 &  24 &  24 \\
+  & \texttt{SWAP}                    &  3 &  24 &  24 &  23 \\
+  & \texttt{POST}                    &  6 &  27 &  25 &  25 \\
+  & \texttt{RESL}                    &  4 &  22 &  21 &  21 \\ \midrule
+  \multirow{2}{*}{\texttt{fib20}}  & &  6 &  34 &  32 &  32 \\
+  & \texttt{LOOP}                    &  7 &  20 &  20 &  18 \\ \midrule
+  \multirow{5}{*}{\texttt{primes}} & &  2 &   6 &   6 &   6 \\
+  & \texttt{LOOP}                    &  2 &  12 &  12 &  12 \\
+  & \texttt{SCANNED}                 &  4 &  17 &  16 &  16 \\
+  & \texttt{SCAN}                    &  3 &  17 &  17 &  17 \\
+  & \texttt{LOOP2}                   &  4 &  24 &  24 &  24 \\ \midrule
+  \multirow{5}{*}{\texttt{tri100}} & &  2 &   6 &   6 &   6 \\
+  & \texttt{LOOP}                    &  2 &   6 &   6 &   6 \\
+  & \texttt{LOOP2}                   &  4 &  20 &  19 &  19 \\
+  & \texttt{BREAK}                   &  4 &  23 &  22 &  22 \\
+\end{tabular}
+\caption{Instruction execution counts per block}\label{tab:instructionperblock}
+\end{table}
+
+\pgfplotstableread[col sep=comma]{%
+Register,Stack,Peephole,Koopman
+%34,103,102,102
+2,9,8,8
+5,25,24,24
+3,24,24,23
+6,27,25,25
+4,22,21,21
+6,34,32,32
+7,20,20,18
+2,6,6,6
+2,12,12,12
+4,17,16,16
+3,17,17,17
+4,24,24,24
+2,6,6,6
+2,6,6,6
+4,20,19,19
+4,23,22,22
+}\blockdata%
+
+\begin{figure}
+  \begin{tikzpicture}
+    \begin{axis}[
+        xlabel=No.\ of register instructions,
+        ylabel=No.\ of stack instructions,
+        legend cell align=left,
+        legend style={%
+          at={(1,0)},
+          anchor=south west,
+          column sep=1ex
+        }
+    ]
+      \addplot [only marks,mark=x,blue] table [y=Stack] {\blockdata};
+      \addplot [thick,blue] table [y={create col/linear regression={y=Stack}}] {\blockdata};
+      \addlegendentry{Base}
+      \addplot [only marks,mark=x,red] table [y=Peephole] {\blockdata};
+      \addplot [thick,red] table [y={create col/linear regression={y=Peephole}}] {\blockdata};
+      \addlegendentry{Peephole}
+      \addplot [only marks,mark=x,brown] table [y=Koopman] {\blockdata};
+      \addplot [thick,brown] table [y={create col/linear regression={y=Koopman}}] {\blockdata};
+      \addlegendentry{Koopman}
+      \legend{Base,,Peephole,,Koopman}
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Graph of register blocks to stack equivalents}\label{fig:instructionperblock}
+\end{figure}
+
+Table~\ref{tab:instructionperblock} lists the number of stack instructions
+produced per block of register code, for different optimisation levels. The
+`empty' block row represents the initial block of the program, with no label. It
+is graphed in Figure~\ref{fig:instructionperblock}. Notably for the graph, the
+initialisation block for bsort is omitted as it is considerably larger than
+anything else and considered anomalous.
+
+
+\section{Evaluation}\label{sec:testingevaluation}
+The basic results (Seen in Table~\ref{tab:instructions} and
+Figure~\ref{fig:relativeinstructions}) show some interesting results, showing
+that Peephole optimisation does the bulk of the the overall executed instruction
+count reduction and that Koopman-style stack scheduling has very little effect.
+
+However, looking at the number of memory reads \& writes (with \lstinline{LOAD}
+\& \lstinline{STORE} respectively) in Table~\ref{tab:meminstructions} (and
+visualised in Figure~\ref{fig:relativememinstructions}) shows a different
+result, with stack scheduling doing as much reduction as peephole optimisation
+if not more, particularly in the case of the \texttt{primes} \& \texttt{tri100}
+programs which have no instruction decrease with stack scheduling, but a
+significant decrease in memory usage.
+
+While the optimisation results are good (30\% reduction in memory usage is
+quite substantial), it is not the same as promised by Koopman in his original
+paper. Koopman claimed to be able to remove 90--100\% of redundant local
+variable accesses. The results here are not quite the same measurement, but it
+is hard to believe that they are the same number which is difficult to
+programatically calculate --- Koopman did it by studying the program's output by
+hand. It is possible that the results are so different due to the programs used
+--- `tight loops' that don't make much use of variable accesses won't have as
+many opportunities for stack scheduling as others.
+
+\subsection{Completion of requirements}
+All key features of the project were completed, but only one of the desirable
+features was able to be partially implemented, largely due to time constraints.
+
+Both register and stack emulators were implemented and able to accurately
+emulate their respective assembly languages. Stack code was able to be generated
+from register code which was correct and free of other side effects. Both
+peephole optimisations and stack-scheduling were implemented as optional
+features in the conversion routines that can be enabled at will with command
+flags (similar to optimise flags in C++ compilers).
+
+
+
+\subsection{Program correctness}
+No significant automated testing of the implementation has been done. Instead
+the program's output was verified ``by eye'' and for the test run the multiple
+executions were compared against each other, to ensure consistent results.
+
+\subsection{Code quality}
+The code itself is relatively extensible for future work. It is published as
+open-source software at \texttt{github.com/LordAro/reg2stack} enabling any
+future work to be able to be built on top of this software. The peephole
+optimsation implementation allows for easy additions --- just add the relevant
+function and add the function name to the list of existing functions.
+
+Documentation of the code could definitely be improved. While complicated code
+generally has comments explaining exactly why it does what it does, it's by no
+means complete and could certainly be expanded. Many functions are also missing
+`doccoments', which generally take the form of comments above the function
+definition which can then be parsed by some external tool to generate more
+formal documentation. If this were expanded it would be really helpful to future
+work done on the program.
