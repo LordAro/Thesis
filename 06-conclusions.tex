@@ -1,4 +1,14 @@
 \chapter{Conclusions}\label{ch:conclusions}
+In conclusion, this project was successful in its aim of finding performance
+improvements in generated stack code from the na{\"\i}ve model of doing so. A
+variety of optimisation techniques can be applied to the generated code to
+both reduce raw instruction count and reduce memory usages. The results vary
+depending on the program, but the results for this project resulted in around a
+10\% decrease in raw stack instruction count and up to 25\% decrease in number
+of memory accesses. More significant results were seen with conversion block
+caching, seeing an up to 60\% decrease in relative program cost based on an
+estimated memory model.
+
 \section{Further work}\label{sec:furtherwork}
 There is much further work that can be applied to this project.
 
@@ -6,6 +16,11 @@ First and foremost would be to implement further optimisations, such as the
 inter-block algorithm by Bailey and the refinements done by Shannon show great
 potential for further improvements especially with the tight loops of the
 programs tested in this project.
+
+There's also further scope for improving the instruction block caching system.
+Other than improving how blocks are divided up, making use of Transmeta's
+`translation threshold' method could prove more effective for reducing the
+relative cost of running a program.
 
 Other options would be to more properly prove that the implementation of the
 emulators, and the conversion routines is correct. Formal methods to

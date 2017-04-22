@@ -1,5 +1,5 @@
 \chapter{Testing, Results and Evaluation}\label{ch:testingresults}
-
+\section{Testing}
 Due to the emulated nature of the implementation of this project, the only
 meaningful metric that can be taken from the results would be comparing
 instruction counts between the register program and the unoptimised and
@@ -141,7 +141,7 @@ optimisation level, where no optimisations is the base level at one.
   & \texttt{LOOP2}                   &  4 &  20 &  19 &  19 \\
   & \texttt{BREAK}                   &  4 &  23 &  22 &  22 \\
 \end{tabular}
-\caption{Instruction execution counts per block}\label{tab:instructionperblock}
+\caption{Instruction counts per block}\label{tab:instructionperblock}
 \end{table}
 
 \pgfplotstableread[col sep=comma]{%
@@ -196,15 +196,164 @@ Table~\ref{tab:instructionperblock} lists the number of stack instructions
 produced per block of register code, for different optimisation levels. The
 `empty' block row represents the initial block of the program, with no label. It
 is graphed in Figure~\ref{fig:instructionperblock}. Notably for the graph, the
-initialisation block for bsort is omitted as it is considerably larger than
-anything else and considered anomalous.
+initialisation block for \texttt{bsort} is omitted as it is considerably larger
+than anything else and considered anomalous.
 
+\begin{table}
+\begin{tabular}{l l r r r r}
+  Program & Block & Register & Stack & Peephole & Koopman \\ \toprule
+  \multirow{6}{*}{\texttt{bsort}}  & & 34 & 35 & 34 & 34 \\
+  & \texttt{LOOP}                    &  2 &  3 &  3 &  3 \\
+  & \texttt{LOOP2}                   &  5 &  8 &  7 &  6 \\
+  & \texttt{SWAP}                    &  3 & 10 & 10 &  9 \\
+  & \texttt{POST}                    &  6 &  6 &  5 &  5 \\
+  & \texttt{RESL}                    &  4 &  6 &  6 &  5 \\ \midrule
+  \multirow{2}{*}{\texttt{fib20}}  & &  6 &  6 &  6 &  4 \\
+  & \texttt{LOOP}                    &  7 & 12 & 11 &  9 \\ \midrule
+  \multirow{5}{*}{\texttt{primes}} & &  2 &  2 &  6 &  2 \\
+  & \texttt{LOOP}                    &  2 &  2 &  2 &  2 \\
+  & \texttt{SCANNED}                 &  4 &  4 &  5 &  3 \\
+  & \texttt{SCAN}                    &  3 &  5 &  4 &  5 \\
+  & \texttt{LOOP2}                   &  4 &  7 &  7 &  6 \\ \midrule
+  \multirow{5}{*}{\texttt{tri100}} & &  2 &  2 &  2 &  2 \\
+  & \texttt{LOOP}                    &  2 &  2 &  2 &  2 \\
+  & \texttt{LOOP2}                   &  4 &  7 &  7 &  6 \\
+  & \texttt{BREAK}                   &  4 &  5 &  5 &  4 \\
+\end{tabular}
+  \caption{LOAD/STORE instruction counts per block}
+\label{tab:meminstructionperblock}
+\end{table}
+
+
+\pgfplotstableread[col sep=comma]{%
+Register,Stack,Peephole,Koopman
+%34,35,34,34
+2,3,3,3
+5,8,7,6
+3,10,10,9
+6,6,5,5
+4,6,6,5
+6,6,6,4
+7,12,11,9
+2,2,6,2
+2,2,2,2
+4,4,5,3
+3,5,4,5
+4,7,7,6
+2,2,2,2
+2,2,2,2
+4,7,7,6
+4,5,5,4
+}\blockmemdata%
+
+\begin{figure}
+  \begin{tikzpicture}
+    \begin{axis}[
+        xlabel=No.\ of register instructions,
+        ylabel=No.\ of LOAD/STORE stack instructions,
+        legend cell align=left,
+        legend style={%
+          at={(1,0)},
+          anchor=south west,
+          column sep=1ex
+        }
+    ]
+      \addplot [only marks,mark=x,blue] table [y=Stack] {\blockmemdata};
+      \addplot [thick,blue] table [y={create col/linear regression={y=Stack}}]
+      {\blockmemdata};
+      \addlegendentry{Base}
+      \addplot [only marks,mark=x,red] table [y=Peephole] {\blockmemdata};
+      \addplot [thick,red] table [y={create col/linear regression={y=Peephole}}]
+      {\blockmemdata};
+      \addlegendentry{Peephole}
+      \addplot [only marks,mark=x,brown] table [y=Koopman] {\blockmemdata};
+      \addplot [thick,brown] table [y={create col/linear regression={y=Koopman}}]
+      {\blockmemdata};
+      \addlegendentry{Koopman}
+      \legend{Base,,Peephole,,Koopman}
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Graph of register blocks to stack memory read/writes}
+\label{fig:meminstructionperblock}
+\end{figure}
+
+Table~\ref{tab:meminstructionperblock} lists the number of LOAD/STORE
+instructions produced per block of register code, for different optimisation
+levels. Similarly to previous tables, the `empty' block row represents the
+initial block at the start of the program, given it has no label. The table is
+graphed in Figure~\ref{fig:meminstructionperblock} and again excludes the
+initialisation block for \texttt{bsort}. Note that the table and figure compare
+against the total register instruction count, rather than the number of memory
+usages the register blocks have. This is because as registers are being emulated
+as memory positions, it would be difficult to reliably determine which register
+instructions either use or cause memory usages.
+
+\begin{table}
+  \begin{tabular}{l l}
+    Caching a block & 10 $\times$ number of register instructions \\
+    Retrieving a block & 1 \\
+    Memory accesses & 3 \\
+    Branches & 2 \\
+    Other & 1 \\
+  \end{tabular}
+  \caption{Memory model used for estimating program cost}\label{tab:memmodel}
+\end{table}
+
+\begin{table}
+  \begin{tabular}{r r r r}
+                    &   Base & Peephole & Koopman \\ \toprule
+    \texttt{bsort}  &  97292 &    93746 &   92454 \\ \midrule
+    \texttt{fib20}  &   1300 &     1224 &    1142 \\ \midrule
+    \texttt{primes} &  19615 &    19516 &   18978 \\ \midrule
+    \texttt{tri100} & 202089 &   197040 &  186942 \\ \midrule
+  \end{tabular}
+  \caption{Program cost with caching disabled}\label{tab:costnocaching}
+\end{table}
+
+\begin{table}
+  \begin{tabular}{r r r r}
+                    &   Base & Peephole & Koopman \\ \toprule
+    \texttt{bsort}  &  40902 &    37356 &   36064 \\ \midrule
+    \texttt{fib20}  &   1300 &     1224 &    1142 \\ \midrule
+    \texttt{primes} &  11981 &    11882 &   11344 \\ \midrule
+    \texttt{tri100} & 192583 &   187534 &  177436 \\ \midrule
+  \end{tabular}
+  \caption{Program cost with caching}\label{tab:costcaching}
+\end{table}
+
+\pgfplotstableread[col sep=comma,header=false]{%
+bsort,97292,93746,92454,40902,37356,36064
+fib20,1300,1224,1142,1300,1224,1142
+primes,19615,19516,18978,11981,11882,11344
+tri100,202089,197040,186942,192583,187534,177436
+}\costdata%
+
+\begin{figure}
+  \begin{tikzpicture}
+    \begin{axis}[relative graph,bar width=0.25cm,ymin=0]
+      \addplot table [relative series=1] {\costdata};
+      \addplot table [relative series=4] {\costdata};
+      \addplot table [relative series=2] {\costdata};
+      \addplot table [relative series=5] {\costdata};
+      \addplot table [relative series=3] {\costdata};
+      \addplot table [relative series=6] {\costdata};
+      \legend{Base,Base Cached,Peephole,Peephole Cached,Koopman,Koopman Cached}
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Relative program cost with and without caching}\label{fig:progcost}
+\end{figure}
+
+Tables~\ref{tab:costnocaching} \&~\ref{tab:costcaching} describe the `costs' of
+running the benchmarking programs with the memory model described in
+Table~\ref{tab:memmodel}. The two tables are represented in
+Figure~\ref{fig:progcost}.
 
 \section{Evaluation}\label{sec:testingevaluation}
 The basic results (Seen in Table~\ref{tab:instructions} and
-Figure~\ref{fig:relativeinstructions}) show some interesting results, showing
-that Peephole optimisation does the bulk of the the overall executed instruction
-count reduction and that Koopman-style stack scheduling has very little effect.
+Figure~\ref{fig:relativeinstructions}) are somewhat counterintuative, showing
+that the Peephole optimisation stage does the bulk of the the overall executed
+instruction count reduction and that Koopman-style stack scheduling has very
+little effect.
 
 However, looking at the number of memory reads \& writes (with \lstinline{LOAD}
 \& \lstinline{STORE} respectively) in Table~\ref{tab:meminstructions} (and
@@ -224,6 +373,34 @@ hand. It is possible that the results are so different due to the programs used
 --- `tight loops' that don't make much use of variable accesses won't have as
 many opportunities for stack scheduling as others.
 
+Looking at Table~\ref{tab:instructionperblock} and its linked
+Figure~\ref{fig:instructionperblock}, it can be seen that per block that while
+stack-scheduling does have an effect on instruction count, it is the preliminary
+peephole optimisations that have the majority of the effect. Despite this,
+looking at Table~\ref{tab:meminstructionperblock} and
+Figure~\ref{fig:meminstructionperblock} again shows where stack-scheduling
+becomes relevant and useful with the reduction in memory usage, where the linear
+regression line shows significantly lower average memory usage than peephole (\&
+no) optimisations. The linear regression line for peephole optimisations starts
+above the base stack output, this is likely due to the small size of the data
+set --- overall the line's gradient is shallower than the base output, implying
+that the results would continue to improve for larger block sizes.
+
+The affects of the instruction snippet cache are more impressive. As seen
+Figure~\ref{fig:progcost} (with raw data in Tables~\ref{tab:costnocaching}
+\&~\ref{tab:costcaching}), each optimisation level decreases cost in a similar
+fashion to the raw instruction counts discussed earlier. However, caching these
+instruction blocks leads to some significant decreases in program cost for
+highly looping programs, like \texttt{bsort} \& \texttt{primes}. Caching notably
+has no effect on \texttt{fib20} and hardly any on \texttt{tri100} --- this is
+down to the simplicity of the programs involved as they make very little use of
+branching to change to a different block, only branching within the block is
+used. While the costs of each instruction are only estimates
+(Table~\ref{tab:memmodel}), it shows the potential effectiveness of the
+instruction caching well. The estimated cost of converting register instructions
+is likely quite high compared to reality, so further improvements may be
+available depending on its actual efficiency.
+
 \subsection{Completion of requirements}
 All key features of the project were completed, but only one of the desirable
 features was able to be partially implemented, largely due to time constraints.
@@ -233,9 +410,15 @@ emulate their respective assembly languages. Stack code was able to be generated
 from register code which was correct and free of other side effects. Both
 peephole optimisations and stack-scheduling were implemented as optional
 features in the conversion routines that can be enabled at will with command
-flags (similar to optimise flags in C++ compilers).
+flags (similar to optimise flags in C++ compilers), for the purpose of
+assertaining the amount of improvement each level of optimisation gives.
 
-
+Bailey \& Shannon's optimisation algorithms were not able to be implemented,
+largely due to time constraints. While the tool did have various debugging
+levels for which to get output out of, the interface was rather crude and the
+data output needed some transformations (using a python testing interface and
+\texttt{grep}) to get meaningful results out of, so it would've been preferrable
+to have nicer interfaces.
 
 \subsection{Program correctness}
 No significant automated testing of the implementation has been done. Instead

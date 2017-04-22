@@ -143,6 +143,12 @@ OUT "Hello, world!"
 \end{minipage}
 
 \section{Emulator implementation}
+Both emulators (plus the conversion ``emulator'') will be written to be part of
+the same program, with the different functionality controlled with commandline
+flags. This method enables the emulators to share functionality where
+appropriate, especially for the conversion `machine' which can be built directly
+on top of the stack machine using object orientated programming techniques.
+
 Early in the implementation, it was decided to cut down on the instructions that
 the emulators, as they were either esoteric or difficult to implement while
 being irrelevant to this project. In particular, none of the special opcodes for
@@ -568,3 +574,35 @@ it may find pairs of STORE/LOAD which are actually outside the block. Due to
 time-constraints it was not possible to implement a better block-finding
 algorithm, so a workaround is to add an (unused) label at the actual logical end
 of the block.
+
+\section{Test implementations}
+Several simple benchmark programs were written in the source DCPU-16
+architecture for the purpose of showing the effectiveness of the optimisation
+algorithms. First was an implementation of bubble sort that sorted 32 16-bit
+numbers, one of the more complex programs, having nested loops. Next was a
+Fibonacci program that output the first 20 numbers in the Fibonacci sequence.
+This was the simplest program, with a single loop. A prime calculator was next,
+which used a prime sieve to find all the prime numbers up to 100. While had
+similarly nested loops like the bubble sort program, it was implemented in a way
+such that the loops were actually separated out in the program, so that it
+branched a lot more than it would've done otherwise. Lastly there was the
+triangle number calculator, which calculated the first 100 triangle numbers
+($T_{n} = n(n+1)/2$).
+
+The contents of these programs can be seen in
+Appendix~\ref{ch:benchmarkprograms}.
+
+For getting results out, the programs would have to be converted several times
+with various different commandline flags for the register vs stack conversion
+and for the different optimisation levels. For this a simple `test harness' was
+written in python, which looped through all the programs, generating the correct
+flags for running them, and ran them, capturing their outputs. First check was
+to check equality of the converted code output with the output of the standard
+register emulator. This of course wouldn't suffice of both emulators were
+incorrect, but checking that `by eye' sufficed for that. Then the register code
+was converted with each level of optimisation and the output of which is
+captured and parsed. The emulator was writting in such a way that at a certain
+debug level it would include every instruction that had been run, or information
+about instruction caching. After some pattern matching on this output was done,
+numerical results were obtained.
+

@@ -1,9 +1,9 @@
 \chapter{Literature Review}\label{ch:litreview}
 \section{Computer architectures}
 With the exception of Babbage's Analytical Engine, probably the earliest
-computer architecture formerly described is that of the EDVAC (Electronic
+computer architecture to be formally described is that of the EDVAC (Electronic
 Discrete Variable Automatic Computer), in 1945 by John von~Neumann in his
-incomplete `First Draft of a Report on the EDVAC'. In it, von~Neumann described
+incomplete `First Draft of a Report on the EDVAC'. In it, von~Neumann describes
 a computer which is subdivided into six separate parts --- Central Arithmetic
 (CA); Central Control (CC); Memory; Input; Output and External Memory (at the
 time, this was intended to be something like punched tape). These components
@@ -12,11 +12,11 @@ Memory acting as associative (linking) neurons, the Input \& Output acting as
 sensory \& motor neurons respectively.
 Von~Neumann also wanted to keep the computer as simple as possible, so suggested
 that arithmetic operations (such as add and multiply) should not be overlapped,
-and performed only one digit at a time. He also noted that external input/output
-should first be placed into memory, rather than directly in/out of the CC or
-CA\@.
-This approach to laying out the components of a computer stuck, and the
-approximate idea is still used in modern processors today.\cite{FirstDraft}
+and performed only one digit (this being before bits and bytes were named as
+such) at a time. He also noted that external input/output should first be placed
+into memory, rather than directly in/out of the CC or CA\@. This approach to
+laying out the components of a computer stuck, and the approximate idea is still
+used in modern processors today.\cite{FirstDraft}
 
 \subsection{Register machines}
 In the 1950s, logic gates and switches were largely implemented using the quite
@@ -32,23 +32,53 @@ why it was able to be designed and fabricated as one chip. It's worth noting
 that Intel as a company didn't have much faith in this product, opting to
 instead focus on its line of memory chips and partnering with a Japanese
 electronic calculator firm, Busicom, to help finance the project. Nonetheless,
-the 4004 was a huge success with 4004 being produced for 10 solid years and
-taking Intel to the giant in the computing world that it is
+the 4004 was a huge commercial success with 4004 being produced for 10 solid
+years and taking Intel to the giant in the computing world that it is
 today.\cite{Aspray1997Intel}
 
 \begin{figure}
   \includegraphics[width=0.5\textwidth]{imgs/Intel_C4004}
-  \caption{Intel's 4004 microprocessor}
-\label{fig:4004}
+  \caption{Intel's 4004 microprocessor}\label{fig:4004}
 \end{figure}
 
 Very simply, register architectures work by having several named locations
-within the CPU that store values that can be used quickly compared to other
-areas of memory.
+(sometimes called the register file) within the CPU providing the fastest way to
+access data in a system, often in a single CPU cycle, and are used to store and
+retrieve intermediate results of computations. There are a number of different
+types of register, with data registers storing numerical values, address
+registers storing memory addresses for accessing system memory, general purpose
+registers store both data and addresses, flag registers for storing truthiness
+states of previous boolean test operations, and various others. There's also
+often an instruction register that isn't accessible to the program running on
+the CPU, but the CPU uses to refer to the current instruction being executed.
+\cite{Mittal2016RegisterFile}\cite{Patterson2011Computer}
+
+In register-based computing, there are two different competing architecture
+types, Reduced Instruction Set Computers (RISC) and CISC (Complex Instruction
+Set Computers). The RISC design uses the idea that a simple instruction set
+enables a simpler microprocessor design, which can then run more instructions
+per instruction cycle as a result. There's no formal definition of what
+consitutes a RISC processor, but the general trend is that they have a single
+instruction per type of operation, e.g.\ only having \texttt{load} and
+\texttt{store} for memory accesses, rather than another instruction being able
+to load or store to memory. Examples of RISC architectures include ARM, PowerPC
+\& SPARC.\@ In recent years, the most powerful supercomputers have also taken to
+using RISC processors, such as the `K Computer' which makes use of a processor
+from the SPARC family.\cite{Yokokawa2011KCJ}
+
+CISC designed processors are opposite in this regard, providing instructions
+that can execute many operations within its execution cycle, sometimes taking
+several cycles of the CPU to complete. For example, an \texttt{add} instruction
+may be able to read from memory, perform the addition, and write back to memory
+all by itself. There is often several instructions provided that implement the
+same operation, but take different types of operands (e.g.\ registers, constants
+or memory addresses). Examples of CISC architectures include IBM's System/360
+and related mainframe architectures, the Z80 and the now ubiquitous x86 series
+of processors.\cite{Patterson1980CRI}
 
 \subsection{Stack machines}
-Using stacks as part of computation has been around almost as long as computing
-itself, with Zuse's Z4 making use of them for subroutines in
+The use of stacks as part of computation has been around almost as long as
+computing itself, with Zuse's Z4 making use of them for subroutines in
 1945,\cite{Speiser2000KZZ} and the Burroughs B5000 and its later models were
 widely used in the 1960s as well.\cite{Organick2014Computer} At the time, stack
 machines were considered to be the fastest computer architecture with the simple
@@ -59,13 +89,6 @@ appealing. A common criticism was that stack architectures necessitated the use
 of memory locations as imitations of registers, which slow the architectures
 down.\cite{Myers1977CAS}
 
-These days stacks in computer architectures and instruction sets are nearly
-exclusively limited to stack frames, to give the ability to do context
-``saving'' and ``loading'' with function calls, in favour of register based
-computation. However, there is a notable exception --- the Java Virtual Machine
-(JVM) uses a stack-based bytecode as its underlying programming
-language.\cite{Schoeberl2005Design}
-
 Instead of having named registers to store values as part of computations, stack
 machines use a stack data structure to store the computationally active
 variables. A stack is a so-called ``last-in, first out'' (LI-FO) data structure,
@@ -75,6 +98,13 @@ stack and take it off again, respectively. Stack machines generally still have a
 couple of registers, although not often anything much more than a program
 counter (for storing current position in the program) and a flags register (for
 storing state about the last instruction for branching).
+
+These days stacks in computer architectures and instruction sets are nearly
+exclusively limited to stack frames, to give the ability to do context
+``saving'' and ``loading'' with function calls, in favour of register based
+computation. However, there is a notable exception --- the Java Virtual Machine
+(JVM) uses a stack-based bytecode as its underlying assembly language and
+virtual machine design.\cite{Schoeberl2005Design}
 
 \section{Stack optimisations}
 
@@ -89,7 +119,8 @@ Despite this, there has been significant work in the area of compiling these
 research has been focused on fixing the repeated loading and storing to the same
 memory location that na{\"\i}ve compilation tends to produce.
 
-Peephole optimisations are a method of removing redundant instructions from
+Peephole optimisations are a method that can be applied to register and stack
+architectures alike, with the effect of removing redundant instructions from
 compiled code. McKeeman gives this name to this optimisation technique as it
 involves looking at small sections of the generated object code, identifying
 inefficient instruction segments and modifying them accordingly to generate
@@ -127,10 +158,11 @@ that can be reached elsewhere, for example with a label statement, which other
 code elsewhere may be relying on.\cite{McKeeman1965Peephole}
 
 One major area of interest of stack optimisations is the concept of stack
-scheduling. That is, separating the code into blocks and executing them somewhat
-concurrently. Baker applies the concept to realtime systems, which have
-deadlines with which they have to have completed their computation by, with
-potentially disastrous results if they do not.\cite{Baker1991Stack}
+scheduling. That is, separating the code into blocks and optimising them by
+removing extra memory accesses so that they can be executed concurrently. Baker
+applies the concept to realtime systems, which have deadlines with which they
+have to have completed their computation by, which has potentially disastrous
+results if they do not.\cite{Baker1991Stack}
 
 Koopman describes a method of optimisation of (generated) stack code that is
 able to remove 91\% to 100\% of redundant local variable accesses. This is
@@ -141,26 +173,27 @@ registers, and also takes note of the parts of the code which are set and then
 never reused, marking them as `DEAD'.  Next is a `code cleanup', which makes
 more use of the stack, converting from the local variables. This is then
 followed by a preliminary peephole optimisation. Then stack scheduling is done,
-which uses a `intra-block' algorithm to examine each block of stack code
-(approximately in between labels and branches) which tries to remove memory
+which uses a `intra-block' algorithm on each block (defined as code sequences
+that contain no labels or branches) of stack code which tries to remove memory
 loads and stores from the program by maintaining a copy on the stack, similar to
 ``register scheduling'' for register architectures. This is finished with
 another peephole optimisation pass to clean up some redundancy produced by the
 stack scheduling. The end result is a quite significant optimisation of
 generated stack code.\cite{Koopman1995Preliminary}
 
-Following on from this, Bailey goes further and describes a way to optimise
-memory accesses across block boundaries. This algorithm works out which memory
-locations are used in adjacent `parent-child' (e.g.\ loops) blocks and
+Following on from this, Bailey goes further and describes an algorithm that can
+optimise memory accesses across block boundaries. This algorithm works out which
+memory locations are used in adjacent `parent-child' (e.g.\ loops) blocks and
 duplicating them on the stack, rather than doing the expensive store and load
-operations. In particular, this algorithm is able to optimise loop variables
-out of memory and onto the stack.\cite{Bailey2000Inter}
+operations. In particular, this algorithm is able to optimise loop variables out
+of memory and onto the stack, greatly reducing the number of memory accesses for
+highly used loops.\cite{Bailey2000Inter}
 
 Further work still was done by Shannon, who implemented a C compiler for an
 abstract stack machine. He implemented both Koopman \& Bailey's algorithms, and
 came up with his own ``global'' optimisations. These are an iteration on top of
 Bailey's algorithm in that it analyses the data-flow of the program (rather than
-just a region), and works out which registers are used where, pushing that data
+just a region) and works out which registers are used where, pushing that data
 to the stack where possible. Shannon's results also show how different memory
 models can affect the performance of (optimised) stack code by varying the costs
 of different instructions.\cite{Shannon2006AC}
@@ -169,10 +202,10 @@ of different instructions.\cite{Shannon2006AC}
 
 Gschwind et.\ al.\ describe the design issues they experienced when implementing
 a binary translator for IBM's ESA/390 architecture, for their mainframes, to a
-VLIW processor for performance purposes. The primary difficulties experienced
-were due to the source CISC architecture's nature and what it allowed, notably
-with self-modifying code, atomicity of instructions in interrupts, and
-preserving behaviour with memory access reordering (for performance purposes).
+VLIW processor to improve performance. The primary difficulties experienced were
+due to the source CISC architecture's nature and what it allowed, notably with
+self-modifying code, and preserving behaviour with the atomicity of instructions
+in interrupts and with memory access reordering (for performance purposes).
 These issues were solved with a variety of methods, for example solving the
 interrupt preciseness by testing early for the exception conditions before
 modifying and translating the code. They were also able to do optimisations as
