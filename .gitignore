@@ -4,8 +4,11 @@
 *.log
 *.lol
 *.lot
+*.nav
+*.out
 *.run.xml
 *.fls
+*.snm
 *.synctex.gz
 *.toc
 
