@@ -1,16 +1,40 @@
 \chapter{Conclusions}\label{ch:conclusions}
-In conclusion, this project was successful in its aim of finding performance
-improvements in generated stack code from the na{\"\i}ve model of doing so. A
-variety of optimisation techniques can be applied to the generated code to
-both reduce raw instruction count and reduce memory usages. The results vary
-depending on the program, but the results for this project resulted in around a
-10\% decrease in raw stack instruction count and up to 25\% decrease in number
-of memory accesses. More significant results were seen with conversion block
-caching, seeing an up to 60\% decrease in relative program cost based on an
-estimated memory model.
+This project set out to show that it was possible to get performance
+improvements out of stack machine code that was generated from code intended for
+a register-based architecture. Ultimately, the results for this project resulted
+in around a 10\% decrease in raw stack instruction count and up to 25\% decrease
+in number of memory accesses. More significant results were seen with conversion
+block caching, seeing an up to 60\% decrease in relative program cost based on
+an estimated memory model. The implementation was also designed in such a way
+that allows for further optimisations and improvements to be made to the
+project and the software was released on GitHub to facilitate this.
+
+All requirements to the project as defined in Problem Analysis
+(Chapter~\ref{ch:problemanalysis}) were evaluated
+(Section~\ref{sec:testingevaluation}) and it was found that all key requirements
+were completed and but there was only partial completion of one of the optional
+requirements. Both register architectures had ``feature complete'' emulators
+that were able to parse and run their respective assembly code. Stack code is
+able to be generated from each register instruction, with the ability to
+translate whole programs, one block at a time. Through the use of commandline
+flags, two different optimisation levels can be used --- peephole \&
+stack-scheduling --- which reduce both instruction count and the number of
+memory accesses compared to the unoptimised output.  Finally each converted
+block was able to be cached, saving effort on converting it multiple times when
+looped over.
+
+The results of the tests vary depending on the program, but they generally
+result around a 10\% decrease in raw stack instruction count and up to 25\%
+decrease in number of memory accesses. More significant results were seen with
+conversion block caching, seeing an up to 60\% decrease in relative program cost
+based on an estimated memory model.
+
+In conclusion, this project was able to show that there were several
+improvements to be found in stack code generated from code intended for a
+register machine.
 
 \section{Further work}\label{sec:furtherwork}
-There is much further work that can be applied to this project.
+There are several further steps that could be applied to this project.
 
 First and foremost would be to implement further optimisations, such as the
 inter-block algorithm by Bailey and the refinements done by Shannon show great
@@ -28,3 +52,9 @@ mathematically prove correctness could even be used if so inclined. This could
 be taken further to automatically generate test programs that try to break the
 conversion or the emulators, generally referred to as ``fuzz testing''
 
+An ambitious goal would be to implement the conversion and optimisation routines
+in the target stack architecture. This would mean that the the conversion could
+be implemented natively on a processor capable of running the stack program.
+Such a program would be very complicated so a stack language capable of
+high-level features such as functions would be necessary to make this goal
+feasible.

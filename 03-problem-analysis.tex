@@ -16,28 +16,65 @@ written.
 The following is a codified list of key features for the implementation of
 the project that are required for the project to properly succeed:
 
-\begin{itemize}[noitemsep]
-  \item Fully functioning emulator for a register machine architecture.
-  \item Fully functioning emulator for a stack machine architecture.
-  \item Ability to generate stack code from register code.
-  \item Peephole optimisations on generated stack code.
-  \item Koopman-style stack scheduling optimisations on generated stack code.
+\begin{enumerate}[noitemsep,label=R\arabic*]
+  \item Fully functioning emulator for a register machine
+    architecture\label{itm:register}
+  \begin{enumerate}[noitemsep,label=\theenumi.\arabic*]
+    \item Working parser
+    \item Implement basic interpreter
+    \item Implement all instructions
+  \end{enumerate}
+  \item Fully functioning emulator for a stack machine
+    architecture\label{itm:stack}
+  \begin{enumerate}[noitemsep,label=\theenumi.\arabic*]
+    \item Working parser
+    \item Implement basic interpreter
+    \item Implement all instructions
+  \end{enumerate}
+  \item Ability to generate stack code from register code\label{itm:generate}
+  \begin{enumerate}[noitemsep,label=\theenumi.\arabic*]
+    \item Implement conversions for all register instructions
+    \item Transpiler --- translate entire program and output the result
+    \item Translate code in blocks at a time
+  \end{enumerate}
+  \item Apply optimisations to the generated stack code\label{itm:optimise}
+  \begin{enumerate}[noitemsep,label=\theenumi.\arabic*]
+    \item Peephole optimisations
+    \item Koopman-style stack scheduling optimisations
+  \end{enumerate}
   \item Series of results that show significance of optimisation of generated
-    stack code.
-\end{itemize}
+    stack code\label{itm:results}
+  \begin{enumerate}[noitemsep,label=\theenumi.\arabic*]
+    \item Compare number of register instructions with the number of generated
+      stack instructions
+    \item Show reduction in instruction count of optimised stack code
+    \item Show reduction in memory accesses of generated stack code after
+      optimisations
+  \end{enumerate}
+\end{enumerate}
 
-There are also a certain number of desirable features that are optional for the
-project.
+\noindent There are also a certain number of desirable features that are
+optional for the project.
 
-\begin{itemize}[noitemsep]
-  \item Additional stack optimisations, such as Bailey's \& Shannon's algorithms
-    on the generated stack code.
-  \item Translation threshold --- like the TransMeta implementation, only
-  translate regions of code if they are executed more than a certain number of
-  times.
+\begin{enumerate}[noitemsep,resume,label=R\arabic*]
+  \item Additional stack optimisations on the generated stack
+    code\label{itm:moreoptimise}
+  \begin{enumerate}[noitemsep,label=\theenumi.\arabic*]
+    \item Bailey's optimisation algorithm
+    \item Shannon's optisation algorithm
+  \end{enumerate}
+  \item Implement translation block caching\label{itm:caching}
+  \begin{enumerate}[noitemsep,label=\theenumi.\arabic*]
+    \item Cache converted blocks
+    \item Implement a translation threshold --- like the Transmeta
+      implementation, only translate regions of code if they are executed more
+      than a certain number of times
+  \end{enumerate}
   \item Ability to more easily visualise differences between handwritten and
-  generated code, e.g.\ graphs or running side-by-side.
-\end{itemize}
+    generated code, e.g.\ graphs or running side-by-side\label{itm:visualise}
+\end{enumerate}
+%  \begin{enumerate}[noitemsep,label=\theenumi.\arabic*]
+%  \end{enumerate}
 
 The degree to which these objectives are successful will be discussed in
 Section~\ref{sec:testingevaluation} and further work according to which points

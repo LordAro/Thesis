@@ -202,18 +202,22 @@ function tokenise(filepath: string): instruction
 It was quite difficult to determine the type of the operands from the source.
 C++ in particular made it difficult due to its type system. The eventual
 solution was to use a variant (typesafe union) type to store integers (for
-literals), register references, and strings for everything else. The
-``everything else'' proved to be quite complicated as it included not only
-labels and string literals, but memory address lookups as well (e.g.
-\lstinline{SET [2000], 42}). For executing purposes it was possible to check if
-the string started and ended with `[' \& `]' respectively, and getting the value
-of the operand inside. This was further complicated as the DCPU-16 has the
-ability to use compound expressions inside the memory address brackets, e.g.
-\lstinline{[2000+I]} where the contents of the `I' register is added to 2000 to
-get the memory address referred to.
-
-A similar solution was done with the stack
-emulator.
+literals), register references, and strings for everything else. This
+necessitated the use of a third-party library, boost, as C++ does not have such
+a type in it's standard library just yet, although it does gain one in C++17,
+the latest standard that as of writing is not yet fully implemented by the
+common compilers. Boost is a large and complicated library, but if usage is
+limited to only required features it won't increase maintenance costs
+significantly.
+Using strings for the ``everything else'' part of the operand proved to be quite
+complicated as it included not only labels and string literals, but memory
+address lookups as well (e.g.  \lstinline{SET [2000], 42}). For executing
+purposes it was possible to check if the string started and ended with `[' \&
+`]' respectively, and getting the value of the operand inside. This was further
+complicated as the DCPU-16 has the ability to use compound expressions inside
+the memory address brackets, e.g.  \lstinline{[2000+I]} where the contents of
+the `I' register is added to 2000 to get the memory address referred to. A
+similar solution was made for the stack emulator.
 
 For running the emulators themselves, they provided a \lstinline{run} function,
 which is passed the tokenised program to run (along with any flags such as
@@ -235,6 +239,27 @@ the ability to run at a certain clock speed (to mimic the speed the actual
 processor would process instructions) or just as fast as the emulator can run,
 which is more useful for testing purposes. There's also a verbosity flag which
 dumps the state of the machine, for debugging purposes.
+
+For each parsed instruction, a member function for the class of the relevant
+emulator was written. To link each of these methods to their respective
+instruction, it seemed best to use a \texttt{std::map} as provided by the
+standard library. In many places, the functions were very short, only consisting
+of a single line of code, so it was decided to make use of C++'s lambdas. This
+meant, for example, that the implementation for the J5's \texttt{INC}
+instruction only consisted of
+\verb|[](machine *m){m->stack.top()++;}| instead of just referring to the
+function pointer \verb|&machine::inc_func| in the class' function map, which
+avoids all the extra code overhead of having to fully declare an extra method.
+Where the instruction implementation functions were beyond a line, the usual
+style was kept to help keep the code readable. Taking this further, it was
+noticed that many of the instructions followed a pattern (for example,
+\texttt{ADD} and \texttt{SUB} from the J5 both operate on the top two items on
+the stack). As the code for these implementations would've otherwise been
+duplicated several times (where only the exact operation differs), a helper
+function was created to deal with these. This resulted in
+\verb|[](machine *m){m->binop_func([](int a, int b){return a+b;});}| which even
+though works as expected, it is decidedly undecipherable for anyone looking
+through the code for themselves.
 
 The function loop also has to deal with the effects of the conditional
 expressions. For the DCPU-16 this is the \lstinline{IFx} statements where they

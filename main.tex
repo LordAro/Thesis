@@ -61,24 +61,24 @@
 
 \maketitle
 
-%TC:group abstract 0 0
 %TC:group lstlisting 0 0
 \begin{abstract}
-Transmeta are a US based company, who recently surprised the computer
-architecture world by developing a chip which dynamically translates Intel
-binary code into machine language instructions for another (highly optimised
-RISC) CPU core. In doing so it allows Intel code to execute in real-time without
-recompilation, but using a (claimed) much more power efficient processor
-architecture.
+  Transmeta are a US based company, who recently surprised the computer
+  architecture world by developing a chip which dynamically translates Intel
+  binary code into machine language instructions for another (highly optimised
+  RISC) CPU core. In doing so it allows Intel code to execute in real-time
+  without recompilation, but using a (claimed) much more power-efficient
+  processor architecture.
 
-This project attempts to explore something related to the above experiment,
-however the focus will be on translating code into potentially parallel sections
-using a technique called microthreading. Choosing a relatively simple register
-machine for which compiler, assembler, and simulator (or processor) are readily
-available would be a sensible approach. The project will involve writing a
-translator algorithm in high level code, but if time allows the translator can
-be recoded in low-level code, or at least optimised to be as streamlined as
-possible (the speed of translation is a critical factor).
+  This project explores something related to the above experiment. However the
+  focus is on translating code to a stack-based architecture and applying
+  optimisation techniques to the produced instructions, using a technique called
+  stack-scheduling. Research focuses on the history of register and stack-based
+  computing, and previous work on stack optimisation techniques. A combined
+  translator and interpreter for running register code on a stack machine is
+  designed and implemented (\texttt{https://github.com/LordAro/reg2stack}).
+  Several different optimisation models implemented by the software are then
+  tested and the results of which are evaluated.
 \end{abstract}
 
 \cleardoublepage%

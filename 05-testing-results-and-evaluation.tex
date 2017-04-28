@@ -1,21 +1,53 @@
 \chapter{Testing, Results and Evaluation}\label{ch:testingresults}
 \section{Testing}
-Due to the emulated nature of the implementation of this project, the only
-meaningful metric that can be taken from the results would be comparing
-instruction counts between the register program and the unoptimised and
-optimised stack programs.
+Due to the emulated nature of the implementation of this project, metrics such
+as the time programs take to complete and power usage are fairly meaningless or
+impossible to measure. Instead testing will focus on the instructions of the
+original register-based programs and stack programs that they produce, at all
+levels of optimisation --- no optimisations, peephole optimisations, and
+stack-scheduling.
+
+The results will be looking to find the relationship between the number of
+register instructions to generated instructions, so that the effect of each
+optimising level can be assessed. Further attention will be paid to the number
+of memory accesses made by the stack program, as stack-scheduling is supposed to
+be able to significantly reduce redundant memory accesses produced by emulating
+registers as memory.
+
+Using a simple memory model, a basic figure for ``program cost'' can be
+produced. While there will be no equivalent available for the source
+register-based programs, it will be beneficial to see the difference between
+each optimisation level. The memory model can also be used to measure the effect
+of the translation cache, by giving the conversion and caching of the register
+code an (estimated) high cost, to simulate the effects of not having to
+convert heavily used loops many times over.
 
 Testing will be done using a series of programs handwritten for the DCPU-16
-emulator. They vary between simple test programs (for compiler correctness) and
-full benchmarking programs. The test programs were purely for verifying
-emulator \& optimiser correctness and will not be discussed in further detail.
+emulator. For testing purposes, simple test programs (called \texttt{simple},
+\texttt{loop} and \texttt{redundant}) were created only to test compiler
+correctness and were not used for benchmarking.
+
+For the actual benchmark programs, there are several desirable features to
+consider. Since stack-scheduling is an intra-block algorithm, the benchmark
+programs should vary between types of loops that are used, and their frequency
+of use. Highly used loops do well to test the translation cache system. The
+programs should also use a wide variety of register instructions to achieve
+better coverage of the translator and emulators.
+
+A common set of tests used for these type of the programs is the Standford
+Benchmark Suite\cite{stanford}. It's a set of programs written in C that are
+fairly short in code and execution time. It also has the advantage of not
+requiring any input, which both the source DCPU-16 and J5 instruction sets lack.
+Examples of programs in it include bubble sort, towers of hanoi and a matrix
+multiplication.
+
+However, since the implementation in this project lacks any sort of subroutine
+or function support, many of the programs would be quite difficult to feasibly
+implement. With that in mind, a different set of benchmarks was created. Given
+more time, further benchmarks would have been created so as to produce more
+raw data, for better results.
 
 \begin{itemize}[noitemsep]
-  \item \texttt{simple} --- Single addition test
-  \item \texttt{loop} --- Loop test
-  \item \texttt{redundant} --- Program with deliberately redundant register
-  usage
-    \vspace{2ex}
   \item \texttt{bsort} --- Bubble sort benchmark. Sorts 32 integers and prints
   the result
   \item \texttt{fib20} --- Calculates and prints the first 20 fibonacci numbers
@@ -24,6 +56,17 @@ emulator \& optimiser correctness and will not be discussed in further detail.
   \item \texttt{tri100} --- Outputs the first 100 triangle numbers, using the
     addition formula
 \end{itemize}
+
+With the above in mind, the above four programs were written in DCPU-16
+assembly. They were chosen as reasonable examples that cover a range of
+mathematical functions but in particular they vary in their use of loops, which
+is the primary target of the optimisations, stack-scheduling especially. Their
+contents can be seen in full in Appendix~\ref{ch:benchmarkprograms}. Notably,
+\texttt{fib20} and \texttt{tri100} are similar in that they don't branch very
+much, they essentially have a single loop and stay within it. The \texttt{bsort}
+program is made up of several nested loops, as is \texttt{primes}, however it is
+written in such a way that the loops are not nested within the code, which makes
+it jump around a lot more.
 
 \section{Results}
 
@@ -386,6 +429,15 @@ above the base stack output, this is likely due to the small size of the data
 set --- overall the line's gradient is shallower than the base output, implying
 that the results would continue to improve for larger block sizes.
 
+Figures~\ref{fig:instructionperblock} \&~\ref{fig:meminstructionperblock} also
+show the relationship of register instructions to stack instructions quite well,
+with 1 register instruction generating between 4 \& 5 stack instructions
+depending on the optimisation level. The memory accesses are even more
+interesting, with Koopman's stack scheduling getting the ratio of register
+instructions to memory accesses down to just over 1. It would be reasonable to
+conclude then that the stack-scheduling does in fact remove many of the
+unnecessary memory accesses.
+
 The affects of the instruction snippet cache are more impressive. As seen
 Figure~\ref{fig:progcost} (with raw data in Tables~\ref{tab:costnocaching}
 \&~\ref{tab:costcaching}), each optimisation level decreases cost in a similar
@@ -401,24 +453,56 @@ instruction caching well. The estimated cost of converting register instructions
 is likely quite high compared to reality, so further improvements may be
 available depending on its actual efficiency.
 
+Overall, this is a very positive result, as while the generated stack programs a
+lot larger in instruction count, the memory usages are approximately equivalent.
+Which, when taking into account how a stack machine would be simpler than a
+similar register machine and so would be easier to construct and potentially run
+at a higher clock speed, making the machines even more equivalent in program
+execution cost. A reasonable continuation of this would be to alter the stack
+assembly language to help remove some common repeated instruction groups. For
+example, for the J5 assembly language, it would be useful to have a
+\texttt{LOAD} instruction that actually took a memory address, and similarly for
+the \texttt{STORE}, to save having to hardcode a separate \texttt{SET}
+instruction to put a value onto the stack for each instruction. A further
+advanced step would be to vary the produced stack code depending on its
+contents, if a particular group of register instructions could be replaced with
+something simpler than the ``standard'' generated code. A simple example of that
+in this project is the peephole optimisation done on converting \texttt{SET 1}
+\& \texttt{ADD} instructions to an \texttt{INC} instruction. It's not done at
+the initial translation, and the register instruction set lacks a similar
+instruction.
+
 \subsection{Completion of requirements}
 All key features of the project were completed, but only one of the desirable
 features was able to be partially implemented, largely due to time constraints.
 
-Both register and stack emulators were implemented and able to accurately
-emulate their respective assembly languages. Stack code was able to be generated
-from register code which was correct and free of other side effects. Both
-peephole optimisations and stack-scheduling were implemented as optional
-features in the conversion routines that can be enabled at will with command
-flags (similar to optimise flags in C++ compilers), for the purpose of
-assertaining the amount of improvement each level of optimisation gives.
+Requirements~\ref{itm:register} \&~\ref{itm:stack} (implementing the emulators)
+were both fully implemented, with working parsers for their respective assembly
+languages and able to interpret and execute any program in that language, with a
+fully implemented instruction set.
+Code generation was also fully implemented (Requirement~\ref{itm:generate}) that
+was free of side effects.
+The two key optimisation methods (Requirement~\ref{itm:optimise}) were
+also implemented, including commandline flags to enable/disable them when
+required (similarly to optimise flags in C++ compilers)
+These flags were used to get several sets of results
+(Requirement~\ref{itm:results}) focusing on length of generated code with each
+optimisation level, and the number of memory accesses they did.
 
-Bailey \& Shannon's optimisation algorithms were not able to be implemented,
-largely due to time constraints. While the tool did have various debugging
-levels for which to get output out of, the interface was rather crude and the
-data output needed some transformations (using a python testing interface and
-\texttt{grep}) to get meaningful results out of, so it would've been preferrable
-to have nicer interfaces.
+Unfortunately, the additional requirements (notably
+Requirements~\ref{itm:moreoptimise} \&~\ref{itm:visualise}) were not able to be
+implemented, largely due to time constraints on the project. While the tool did
+have various debugging levels for which to get output out of, the interface was
+rather crude and the data output needed some transformations (using a python
+testing interface and \texttt{grep}) to get meaningful results out of, so it
+would've been preferrable to have nicer interfaces. However, there was partial
+completion of Requirement~\ref{itm:caching}, in that each converted block was
+cached, but there was no concept of a `threshold' at which to convert them. This
+would've been useful as the expense of converting and caching the initalisation
+routines (that set all the input data) is likely too much compared to just
+running them, bringing up the `program cost' of the program as discussed in the
+results above. It would be preferable to only convert \& cache loops that are
+executed lots of times.
 
 \subsection{Program correctness}
 No significant automated testing of the implementation has been done. Instead

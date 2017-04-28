@@ -1,4 +1,5 @@
 *.aux
+*.auxlock
 *.lof
 *.log
 *.lol

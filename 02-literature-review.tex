@@ -4,12 +4,12 @@ With the exception of Babbage's Analytical Engine, probably the earliest
 computer architecture to be formally described is that of the EDVAC (Electronic
 Discrete Variable Automatic Computer), in 1945 by John von~Neumann in his
 incomplete `First Draft of a Report on the EDVAC'. In it, von~Neumann describes
-a computer which is subdivided into six separate parts --- Central Arithmetic
-(CA); Central Control (CC); Memory; Input; Output and External Memory (at the
-time, this was intended to be something like punched tape). These components
-were described using the human nervous sytem as an analogy, with the CA, CC \&
-Memory acting as associative (linking) neurons, the Input \& Output acting as
-sensory \& motor neurons respectively.
+a fully programmable computer which is subdivided into six separate parts ---
+Central Arithmetic (CA); Central Control (CC); Memory; Input; Output and
+External Memory (at the time, this was intended to be something like punched
+tape). These components were described using the human nervous sytem as an
+analogy, with the CA, CC \& Memory acting as associative (linking) neurons, the
+Input \& Output acting as sensory \& motor neurons respectively.
 Von~Neumann also wanted to keep the computer as simple as possible, so suggested
 that arithmetic operations (such as add and multiply) should not be overlapped,
 and performed only one digit (this being before bits and bytes were named as
@@ -70,7 +70,7 @@ CISC designed processors are opposite in this regard, providing instructions
 that can execute many operations within its execution cycle, sometimes taking
 several cycles of the CPU to complete. For example, an \texttt{add} instruction
 may be able to read from memory, perform the addition, and write back to memory
-all by itself. There is often several instructions provided that implement the
+all by itself. There are often several instructions provided that implement the
 same operation, but take different types of operands (e.g.\ registers, constants
 or memory addresses). Examples of CISC architectures include IBM's System/360
 and related mainframe architectures, the Z80 and the now ubiquitous x86 series
@@ -91,20 +91,21 @@ down.\cite{Myers1977CAS}
 
 Instead of having named registers to store values as part of computations, stack
 machines use a stack data structure to store the computationally active
-variables. A stack is a so-called ``last-in, first out'' (LI-FO) data structure,
+variables. A stack is a so-called ``last in, first out'' (LI-FO) data structure,
 meaning that the data that was last put into the structure is the first to be
 pulled out again, usually with push \& pop operations, which place data onto the
-stack and take it off again, respectively. Stack machines generally still have a
-couple of registers, although not often anything much more than a program
-counter (for storing current position in the program) and a flags register (for
-storing state about the last instruction for branching).
+stack and take it off again, respectively. This is compared to a data structure
+such as a queue, which is a ``first in, first out'' structure. Stack machines
+generally still have a couple of registers, although not often anything much
+more than a program counter (for storing current position in the program) and a
+flags register (for storing state about the last instruction for branching).
 
-These days stacks in computer architectures and instruction sets are nearly
-exclusively limited to stack frames, to give the ability to do context
-``saving'' and ``loading'' with function calls, in favour of register based
-computation. However, there is a notable exception --- the Java Virtual Machine
-(JVM) uses a stack-based bytecode as its underlying assembly language and
-virtual machine design.\cite{Schoeberl2005Design}
+In the present day the use of stacks in computer architectures and instruction
+sets is nearly exclusively limited to stack frames, to give the ability to do
+context ``saving'' and ``loading'' with function calls, in favour of register
+based computation. However, there is a notable exception --- the Java Virtual
+Machine (JVM) uses a stack-based bytecode as its underlying assembly language
+and virtual machine design.\cite{Schoeberl2005Design}
 
 \section{Stack optimisations}
 
