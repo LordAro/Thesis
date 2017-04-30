@@ -8,10 +8,10 @@ stack-based architecture.
 
 \section{Limitations}
 Sourcing physical processors and the toolchains capable of compiling and running
-code on both register-based and stack-based architectures is difficult, as what
-exists already tends to be either very out of date, with only partial support,
-or does not exist on both platforms. As such, this project will seek to emulate
-the architectures instead.
+code on both register-based and stack-based architectures is difficult, as
+existing systems tend to be either very out of date, with only partial support,
+or not exist on both platforms. As such, this project will seek to emulate the
+architectures instead.
 
 Since the architectures will be emulated, there are precious few advantages to
 continuing to use the architecture's native binary code, so this project will
@@ -21,16 +21,17 @@ instead take in some form of the respective architecture's assembly language.
 This project has very few ethical concerns. This project only intends to
 implement already published work and show that their results are correct. In
 addition, Transmeta published results for their similar project nearly two
-decades ago with their Crusoe processor and have since closed down, therefore
-any implications of the results of this project will be unlikely to have any
-further affect on any commercial businesses. There is the case of transferring
-the ideas from this project to different architectures. The source architectures
-in this project will be fully evaluated for side effects, but changing to a
-different architecture might result in different results if not examined fully,
-depending on the architecture. This would cause issues for high-integrity
-software where correctness is crucial. The software produced by this project
-will be released under a permissive open-source licence once it is completed,
-should anyone else want to take the project any further.
+decades ago with their Crusoe processor and have since closed down any
+microprocessor production operations and bought out, therefore any implications
+of the results of this project will be unlikely to have any further affect on
+any commercial businesses.  There is the case of transferring the ideas from
+this project to different architectures. The source architectures in this
+project will be fully evaluated for side effects, but changing to a different
+architecture might result in different results if not examined fully, depending
+on the architecture. This would cause issues for high-integrity software where
+correctness is crucial. The software produced by this project will be released
+under a permissive open-source licence once it is completed, should anyone else
+want to take the project any further.
 
 \section{Problem approach}
 Initially, relevant literature will be reviewed, focusing on the work done by

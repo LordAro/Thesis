@@ -396,25 +396,28 @@ The basic results (Seen in Table~\ref{tab:instructions} and
 Figure~\ref{fig:relativeinstructions}) are somewhat counterintuative, showing
 that the Peephole optimisation stage does the bulk of the the overall executed
 instruction count reduction and that Koopman-style stack scheduling has very
-little effect.
+little effect.However, looking at the number of memory reads \& writes (with
+\lstinline{LOAD} \& \lstinline{STORE} respectively) in
+Table~\ref{tab:meminstructions} (and visualised in
+Figure~\ref{fig:relativememinstructions}) shows a different result, with stack
+scheduling doing as much reduction as peephole optimisation if not more,
+particularly in the case of the \texttt{primes} \& \texttt{tri100} programs
+which have no instruction decrease with stack scheduling, but a significant
+decrease in memory usage.
 
-However, looking at the number of memory reads \& writes (with \lstinline{LOAD}
-\& \lstinline{STORE} respectively) in Table~\ref{tab:meminstructions} (and
-visualised in Figure~\ref{fig:relativememinstructions}) shows a different
-result, with stack scheduling doing as much reduction as peephole optimisation
-if not more, particularly in the case of the \texttt{primes} \& \texttt{tri100}
-programs which have no instruction decrease with stack scheduling, but a
-significant decrease in memory usage.
-
-While the optimisation results are good (30\% reduction in memory usage is
-quite substantial), it is not the same as promised by Koopman in his original
-paper. Koopman claimed to be able to remove 90--100\% of redundant local
-variable accesses. The results here are not quite the same measurement, but it
-is hard to believe that they are the same number which is difficult to
-programatically calculate --- Koopman did it by studying the program's output by
-hand. It is possible that the results are so different due to the programs used
---- `tight loops' that don't make much use of variable accesses won't have as
-many opportunities for stack scheduling as others.
+While the optimisation results are also good (around 30\% reduction in memory
+usage is quite substantial), making it appear as though they are not the same as
+what Koopman promised in his original paper of being able to remove 90--100\% of
+redundant local variable accesses. The results here are not quite the same
+measurement, but it seems reasonable to assume as such. The actual number of
+redundant memory accesses is quite hard to programatically calculate, and
+Koopman did it by studying the program's output by hand. A reasonable
+explanation is that the limited set of benchmark programs prevents a
+statistically significant result and other benchmark programs would have more
+opportunities for stack scheduling than the programs presented here. The
+programs used here have fairly short loops or regions (in number of
+instructions) naturally making lots of reuse of variables less likely than
+otherwise.
 
 Looking at Table~\ref{tab:instructionperblock} and its linked
 Figure~\ref{fig:instructionperblock}, it can be seen that per block that while
@@ -436,9 +439,15 @@ depending on the optimisation level. The memory accesses are even more
 interesting, with Koopman's stack scheduling getting the ratio of register
 instructions to memory accesses down to just over 1. It would be reasonable to
 conclude then that the stack-scheduling does in fact remove many of the
-unnecessary memory accesses.
+unnecessary memory accesses. Contrary to the conclusions of
+Figures~\ref{fig:relativeinstructions} \&~\ref{fig:relativememinstructions} as
+presented above, this seems to go much further to validate Koopman's claim of
+near total removal of redundant memory accesses as it shows that register
+machines are not inherently any better than stack machines in terms of the
+overhead of fetching data from memory or registers compared to memory or the
+stack.
 
-The affects of the instruction snippet cache are more impressive. As seen
+The effects of the instruction snippet cache are more impressive. As seen
 Figure~\ref{fig:progcost} (with raw data in Tables~\ref{tab:costnocaching}
 \&~\ref{tab:costcaching}), each optimisation level decreases cost in a similar
 fashion to the raw instruction counts discussed earlier. However, caching these
@@ -455,7 +464,7 @@ available depending on its actual efficiency.
 
 Overall, this is a very positive result, as while the generated stack programs a
 lot larger in instruction count, the memory usages are approximately equivalent.
-Which, when taking into account how a stack machine would be simpler than a
+Which when taking into account how a stack machine would be simpler than a
 similar register machine and so would be easier to construct and potentially run
 at a higher clock speed, making the machines even more equivalent in program
 execution cost. A reasonable continuation of this would be to alter the stack

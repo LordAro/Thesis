@@ -25,9 +25,11 @@ looped over.
 
 The results of the tests vary depending on the program, but they generally
 result around a 10\% decrease in raw stack instruction count and up to 25\%
-decrease in number of memory accesses. More significant results were seen with
-conversion block caching, seeing an up to 60\% decrease in relative program cost
-based on an estimated memory model.
+decrease in number of memory accesses, importantly showing that stack machines
+are not inherently less efficient at dealing with data accesses than register
+machines. More significant and varied results were seen with conversion block
+caching, with results varying from no improvement at all to up to 60\% decrease
+in relative program cost based on the estimated memory model.
 
 In conclusion, this project was able to show that there were several
 improvements to be found in stack code generated from code intended for a
@@ -44,7 +46,11 @@ programs tested in this project.
 There's also further scope for improving the instruction block caching system.
 Other than improving how blocks are divided up, making use of Transmeta's
 `translation threshold' method could prove more effective for reducing the
-relative cost of running a program.
+relative cost of running a program. Further work could also be put into using a
+more accurate memory model, as the results of the program cost
+(Figure~\ref{fig:progcost}) from the one used in this project are only drawn
+from an approximation taken from a flat memory model and an estimated cost for
+translation.
 
 Other options would be to more properly prove that the implementation of the
 emulators, and the conversion routines is correct. Formal methods to
