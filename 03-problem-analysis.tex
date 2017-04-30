@@ -1,19 +1,18 @@
 \chapter{Problem Analysis}\label{ch:problemanalysis}
 The objective of this project is to create a program that can run
-register-based assembly instructions on an emulated stack machine, and implement
+register-based assembly instructions on an emulated stack machine and implement
 optimisation techniques that show improved execution times over the basic
 implementation.
 
-The program implementation should be broken down into a number of steps. First
-will be deciding on the source (register) and target (stack) architectures.  The
-first part of the implementation will be to implement emulators for the chosen
-architectures.  Some conversion routines for register to stack architectures
-will be then implemented. After this, the generated stack code will have
-optimisation techniques applied to it. Finally, suitable test programs will be
-written.
+The program implementation should be broken down into a number of steps.
+The first part of the implementation will be to take the chosen architectures
+and implement emulators for them.  Some conversion routines for register to
+stack architectures will be then implemented. After this, the generated stack
+code will have optimisation techniques applied to it. Finally, suitable test
+programs will be written.
 
 \section{Requirements}
-The following is a codified list of key features for the implementation of
+The following is a collected list of key features for the implementation of
 the project that are required for the project to properly succeed:
 
 \begin{enumerate}[noitemsep,label=R\arabic*]
@@ -39,8 +38,9 @@ the project that are required for the project to properly succeed:
   \end{enumerate}
   \item Apply optimisations to the generated stack code\label{itm:optimise}
   \begin{enumerate}[noitemsep,label=\theenumi.\arabic*]
-    \item Peephole optimisations
-    \item Koopman-style stack scheduling optimisations
+    \item Peephole optimisations~\cite{McKeeman1965Peephole}
+    \item Koopman-style stack scheduling
+      optimisations~\cite{Koopman1995Preliminary}
   \end{enumerate}
   \item Series of results that show significance of optimisation of generated
     stack code\label{itm:results}
@@ -60,10 +60,11 @@ optional for the project.
   \item Additional stack optimisations on the generated stack
     code\label{itm:moreoptimise}
   \begin{enumerate}[noitemsep,label=\theenumi.\arabic*]
-    \item Bailey's optimisation algorithm
-    \item Shannon's optisation algorithm
+    \item Bailey's optimisation algorithm~\cite{Bailey2000Inter}
+    \item Shannon's optisation algorithm~\cite{Shannon2006AC}
   \end{enumerate}
-  \item Implement translation block caching\label{itm:caching}
+  \item Implement translation block
+    caching~\cite{TransmetaCodeMorph}\label{itm:caching}
   \begin{enumerate}[noitemsep,label=\theenumi.\arabic*]
     \item Cache converted blocks
     \item Implement a translation threshold --- like the Transmeta
@@ -79,3 +80,224 @@ optional for the project.
 The degree to which these objectives are successful will be discussed in
 Section~\ref{sec:testingevaluation} and further work according to which points
 are not completed will be discussed in Section~\ref{sec:furtherwork}.
+
+
+\section{Architectural choices}
+Prior to any programming, the programming language used has to be decided on, as
+do the source (register) and target (stack) architectures.
+
+An early decision made was to write emulators for the register and stack
+machines chosen. Toolchains for `obscure' architectures such as the ones likely
+to be chosen tend to be rather limited in nature and either out-of-date, broken
+or both. Writing emulators for the source and target architectures creates extra
+programming work, but means that the choices of programming language and style
+are much greater.
+
+It was decided that to simplify the design, the program would be to
+interpret assembly source code of the register and stack architectures instead
+of running the compiled binary. Doing it this way is only an abstraction over
+actually reading the binaries, and skips out having to compile the source code
+and then decode it again. It would not be difficult to make a program that does
+this but was deemed unnecessary for the core part of this project, to convert a
+register-based instruction set to a stack-based one.
+
+\subsection{Programming language}
+The advantages and disadvantages of several programming languages were evaluated
+for the project.
+
+\subsubsection{C}
+C is one of the oldest programming languages in the world and is only just a
+step above the `raw' assembly level. Despite the age of the language, its
+low-level nature makes it extremely fast, often being the fastest of all
+languages, as it has over 40 years of compiler theory and optimisations backing
+it up. With the emulators written in C there would almost no concern for their
+speed.  However, it does mean that the programmer has to do everything
+themselves, like handle memory management, and it has very little in the way of
+type system which makes it easy to make mistakes in and slows down development
+of features.
+
+\subsubsection{C++}
+C++ is a systems programming language that is well known for its hugely
+powerful templates for generic programming, its ability to use multiparadigm
+styles of programming and its high speed, with significant work being put into
+optimising compilers for the language. Using object-orientated programming, the
+conversion routines can be built on top of one of the emulators, with little
+duplication of code.
+
+The language's power also comes with some disadvantage however. It makes it easy
+to make errors in programming and logic, and its compiler errors for templates
+are infamous for taking up many pages. In fact, C++'s own creator, Bjarne
+Stroustrup, has been quoted as saying ``C makes it easy to shoot yourself in the
+foot; C++ makes it harder, but when you do it blows your whole leg off'' when
+comparing C++ to its parent language C. That said, modern C++ has been making
+big improvements to the language since 2011, with smart pointers, lambdas \&
+type deduction fixing many of the language's major criticisms and making it
+almost unnecessary to ever use manage the program's memory manually.
+
+\subsubsection{Rust}
+Rust is a relatively new systems language that takes inspirations from C++ and
+Haskell, with its main selling point being guaranteed memory safety and
+`zero-cost abstractions' which makes the language very fast to use and very
+difficult to break in the standard ways with segmentation faults and similar
+errors. This safety comes at a cost however as it has a very steep learning
+curve and the compiler's `borrow checker' (how it tracks where values in memory
+are used) is already gaining a reputation for being hard deal with and make
+programs correct to the point that they will compile.
+
+\subsubsection{Python}
+Python is a higher-level language that has a syntax that allows concepts to be
+expressed quickly and easily, with resource management being handled by the
+language. Unlike the other languages discussed here, its type system is dynamic,
+meaning that variables can be reassigned to different types, which helps with
+the ease of programming in it. Also unlike the other languages here
+it is an interpreted language (instead of compiled). While this has its
+advantages, mostly with the speed of development, it has a big impact on the
+speed of the language by comparison.
+
+\subsubsection{Go}
+Go (often called Golang) is also a new systems programming language. It's
+strongly inspired by C, but adds several features that make it easier to use.
+The main feature is that the language is garbage collected, meaning no manual
+memory management. Go's garbage collector is highly sophisticated too, boasting
+often getting microsecond times for its `Stop the World' phase. The language
+also includes several concurrency features that make it a lot easier to program
+parallel code, in particular for web services. Go's garbage collector is also a
+common criticism as systems programming often require manual memory management
+due to system restraints, which the language offers no ability to do so. Go's
+designers have also taken the decision to leave certain features out of the
+language such as generics and operator overloading, which leads to duplicated
+code.
+
+Therefore it was decided to use C++ as this would be a reasonable compromise
+between its speed and multi-paradigm programming ability, over the disadvantages
+of the risk of reduced development speed from fixing programming errors and the
+language's verbosity over a high-level language.
+
+\subsection{Architecture choices}
+
+\subsubsection{Register architectures}
+A shortlist of register architectures was drawn up, of the Zilog Z80, the Xilinx
+Picoblaze, and the DCPU-16. The Z80 is a microprocessor introduced in 1976. It
+is 8-bit based with the capability to address 64KB of memory by means of
+combining its registers. An extremely popular processor during the 1980s, it is
+still used in embedded systems. It has its own assembly
+language that has both register and stack elements. The Picoblaze is a `soft
+processor core', meaning that isn't manufactured specially, rather is fabricated
+on an FPGA (field-programmable gate array) by the user. It uses an 8-bit RISC
+architecture, which makes it very simple to fabricate and run. The DCPU-16 isn't
+a real processor, and has never been produced. It is the invention of
+Markus Persson in 2011 to be emulated as part of a game he was creating that
+never completed, but there was significant interest in it, which means that
+there was many programs and emulators produced for the DCPU-16 processor.
+It's a 16-bit processor that has modularity in mind in the architecture --- the
+computer would `connect' to peripherals to do its IO instead of a more common
+console output interface. Listings~\ref{lst:z80asm},\ref{lst:picoasm}
+and~\ref{lst:dcpuasm} show examples of a ``Hello World'' program in the
+respective assembly languages of the Z80, Picoblaze and DCPU-16.
+
+\noindent\begin{minipage}{0.5\textwidth}
+\begin{lstlisting}[caption={Z80 ASM},label={lst:z80asm}]
+      LD a, 0
+      LD (CURCOL), a
+      LD (CURROW), a
+      LD hl, text
+      B_CALL(_PutS)
+      RET
+text:
+      .db "Hello, world!", 0
+\end{lstlisting}%
+\end{minipage}%
+\noindent\begin{minipage}{0.5\textwidth}
+\begin{lstlisting}[caption={Picoblaze ASM},label={lst:picoasm}]
+module hello_world;
+
+initial begin
+  $display ("Hello, world!");
+  #10 $finish;
+end
+
+endmodule
+\end{lstlisting}%
+\end{minipage}
+
+\noindent\begin{minipage}{\linewidth} %prevent page break
+\begin{lstlisting}[caption={DCPU-16 ASM}, label={lst:dcpuasm}]
+; Attach screen
+SET A, 0
+SET B, vram
+HWI 0
+
+SET J, 0
+
+:loop
+SET I, vram
+ADD I, J
+ADD [I], 0x2000
+ADD J, 1
+IFN J, 12
+    SET PC, loop
+
+:crash
+SET PC, crash
+
+:vram
+DAT "Hello, world!", 0
+\end{lstlisting}%
+\end{minipage}
+
+As the Picoblaze is a soft-processor, it is separated into its ASM and Verilog
+components and you have to processor's components have to be connected together
+manually as part of the build process. The Picoblaze was there fore discounted
+as it was decided that this would be too much boilerplate.
+After some initial emulator implementation for the
+Z80 processor, it was found that its ability to combine registers was not easy
+to implement in a good way in C++, so after some thought it was decided to
+continue with the DCPU-16 assembly language (specification included as
+Appendix~\ref{ch:dcpuspec}), after cutting it down to get rid of
+the peripherals part of the language which isn't necessary for this project.
+
+\subsubsection{Stack architectures}
+
+In terms of stack architectures, Forth, Jasmin, and J5 were shortlisted. Forth
+is a very early programming languages that dates from 1970, when stack machines
+were still common in everyday computing. It's a very simple compiled language
+that still finds uses today in embedded systems due to how easy it is to
+implement in new systems, and its low memory overhead. Jasmin is a variant of
+JVM bytecode, meaning it is a text format rather than the binary files of raw
+JVM bytecode. J5 is a teaching stack language to introduce people to stack
+machines and their respective languages and it is very simple in that regard,
+drawing on ideas from various different actual stack languages. Examples of
+`Hello World' programs in Forth, J5 and Jasmin can be seen in
+Listings~\ref{lst:forthasm},\ref{lst:j5asm} and~\ref{lst:jasminasm}
+respectively.
+
+\noindent\begin{minipage}{0.5\textwidth}
+\begin{lstlisting}[caption={Forth ASM},label={lst:forthasm}]
+CR .( Hello, world!)
+\end{lstlisting}
+\end{minipage}%
+\noindent\begin{minipage}{0.5\textwidth}
+\begin{lstlisting}[caption={J5 ASM},label={lst:j5asm}]
+OUT "Hello, world!"
+\end{lstlisting}
+\end{minipage}
+\begin{minipage}{\textwidth}
+\begin{lstlisting}[caption={Jasmin ASM}, label={lst:jasminasm}]
+.class public HelloWorld
+.super java/lang/Object
+
+.method public static main([Ljava/lang/String;)V
+  .limit stack 3
+  .limit locals 1
+  getstatic      java/lang/System/out Ljava/io/PrintStream;
+  ldc            "Hello World."
+  invokevirtual  java/io/PrintStream/println(Ljava/lang/String;)V
+  return
+.end method
+\end{lstlisting}
+\end{minipage}
+
+Given Jasmin's complexity to write and Forth's complexity to implement, it was
+decided to target the J5 stack language (specification included as
+Appendix~\ref{ch:j5spec}) due to its simplicity compared to the other two
+languages.

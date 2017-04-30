@@ -1,11 +1,10 @@
 \chapter{Testing, Results and Evaluation}\label{ch:testingresults}
 \section{Testing}
-Due to the emulated nature of the implementation of this project, metrics such
-as the time programs take to complete and power usage are fairly meaningless or
-impossible to measure. Instead testing will focus on the instructions of the
-original register-based programs and stack programs that they produce, at all
-levels of optimisation --- no optimisations, peephole optimisations, and
-stack-scheduling.
+
+Due to the emulated nature of the implementation of this project, testing will
+focus on the instructions of the original register-based programs and stack
+programs that they produce, at all levels of optimisation --- no optimisations,
+peephole optimisations, and stack-scheduling.
 
 The results will be looking to find the relationship between the number of
 register instructions to generated instructions, so that the effect of each
@@ -20,7 +19,7 @@ register-based programs, it will be beneficial to see the difference between
 each optimisation level. The memory model can also be used to measure the effect
 of the translation cache, by giving the conversion and caching of the register
 code an (estimated) high cost, to simulate the effects of not having to
-convert heavily used loops many times over.
+convert heavily-used loops many times over.
 
 Testing will be done using a series of programs handwritten for the DCPU-16
 emulator. For testing purposes, simple test programs (called \texttt{simple},
@@ -38,7 +37,7 @@ A common set of tests used for these type of the programs is the Standford
 Benchmark Suite\cite{stanford}. It's a set of programs written in C that are
 fairly short in code and execution time. It also has the advantage of not
 requiring any input, which both the source DCPU-16 and J5 instruction sets lack.
-Examples of programs in it include bubble sort, towers of hanoi and a matrix
+Examples of programs in it include bubble sort, Tower of Hanoi and a matrix
 multiplication.
 
 However, since the implementation in this project lacks any sort of subroutine
@@ -156,10 +155,10 @@ tri100,35345,35345,30296
   \caption{Relative no.\ of LOAD/STORE instructions executed}\label{fig:relativememinstructions}
 \end{figure}
 
-Tables~\ref{tab:instructions} \&~\ref{tab:meminstructions} represent the number
+Tables~\ref{tab:instructions} and~\ref{tab:meminstructions} represent the number
 of instructions executed for a complete run of the benchmark programs, and the
 number of LOAD/STORE operations for each of them for the same run, respectively.
-Figures~\ref{fig:relativeinstructions} \&~\ref{fig:relativememinstructions}
+Figures~\ref{fig:relativeinstructions} and~\ref{fig:relativememinstructions}
 graph the relative decrease in the number of instructions executed for each
 optimisation level, where no optimisations is the base level at one.
 
@@ -325,11 +324,11 @@ instructions produced per block of register code, for different optimisation
 levels. Similarly to previous tables, the `empty' block row represents the
 initial block at the start of the program, given it has no label. The table is
 graphed in Figure~\ref{fig:meminstructionperblock} and again excludes the
-initialisation block for \texttt{bsort}. Note that the table and figure compare
-against the total register instruction count, rather than the number of memory
-usages the register blocks have. This is because as registers are being emulated
-as memory positions, it would be difficult to reliably determine which register
-instructions either use or cause memory usages.
+initialisation block for \texttt{bsort}. Note that the Tables and Figures
+compare against the total register instruction count, rather than the number of
+memory usages the register blocks have. This is because as registers are being
+emulated as memory positions, it would be difficult to reliably determine which
+register instructions either use or cause memory usages.
 
 \begin{table}
   \begin{tabular}{l l}
@@ -386,33 +385,33 @@ tri100,202089,197040,186942,192583,187534,177436
   \caption{Relative program cost with and without caching}\label{fig:progcost}
 \end{figure}
 
-Tables~\ref{tab:costnocaching} \&~\ref{tab:costcaching} describe the `costs' of
+Tables~\ref{tab:costnocaching} and~\ref{tab:costcaching} describe the `costs' of
 running the benchmarking programs with the memory model described in
 Table~\ref{tab:memmodel}. The two tables are represented in
 Figure~\ref{fig:progcost}.
 
 \section{Evaluation}\label{sec:testingevaluation}
-The basic results (Seen in Table~\ref{tab:instructions} and
-Figure~\ref{fig:relativeinstructions}) are somewhat counterintuative, showing
-that the Peephole optimisation stage does the bulk of the the overall executed
+The basic results (seen in Table~\ref{tab:instructions} and
+Figure~\ref{fig:relativeinstructions}) are somewhat counter-intuative, showing
+that the peephole optimisation stage does the bulk of the the overall executed
 instruction count reduction and that Koopman-style stack scheduling has very
-little effect.However, looking at the number of memory reads \& writes (with
-\lstinline{LOAD} \& \lstinline{STORE} respectively) in
+little effect.However, looking at the number of memory reads and writes (with
+\lstinline{LOAD} and \lstinline{STORE} respectively) in
 Table~\ref{tab:meminstructions} (and visualised in
 Figure~\ref{fig:relativememinstructions}) shows a different result, with stack
 scheduling doing as much reduction as peephole optimisation if not more,
-particularly in the case of the \texttt{primes} \& \texttt{tri100} programs
+particularly in the case of the \texttt{primes} and \texttt{tri100} programs
 which have no instruction decrease with stack scheduling, but a significant
 decrease in memory usage.
 
 While the optimisation results are also good (around 30\% reduction in memory
 usage is quite substantial), making it appear as though they are not the same as
-what Koopman promised in his original paper of being able to remove 90--100\% of
-redundant local variable accesses. The results here are not quite the same
-measurement, but it seems reasonable to assume as such. The actual number of
-redundant memory accesses is quite hard to programatically calculate, and
-Koopman did it by studying the program's output by hand. A reasonable
-explanation is that the limited set of benchmark programs prevents a
+what Koopman~\cite{Koopman1995Preliminary} achieved in his original paper, being
+able to remove 90--100\% of redundant local variable accesses. The results here
+are not quite the same measurement, but it seems reasonable to assume as such.
+The actual number of redundant memory accesses is quite hard to programatically
+calculate, and Koopman did it by studying the program's output by hand. A
+reasonable explanation is that the limited set of benchmark programs prevents a
 statistically significant result and other benchmark programs would have more
 opportunities for stack scheduling than the programs presented here. The
 programs used here have fairly short loops or regions (in number of
@@ -420,27 +419,27 @@ instructions) naturally making lots of reuse of variables less likely than
 otherwise.
 
 Looking at Table~\ref{tab:instructionperblock} and its linked
-Figure~\ref{fig:instructionperblock}, it can be seen that per block that while
+Figure~\ref{fig:instructionperblock}, it can be seen (per block) that while
 stack-scheduling does have an effect on instruction count, it is the preliminary
 peephole optimisations that have the majority of the effect. Despite this,
 looking at Table~\ref{tab:meminstructionperblock} and
 Figure~\ref{fig:meminstructionperblock} again shows where stack-scheduling
 becomes relevant and useful with the reduction in memory usage, where the linear
-regression line shows significantly lower average memory usage than peephole (\&
-no) optimisations. The linear regression line for peephole optimisations starts
+regression line shows significantly lower average memory usage than peephole and
+no optimisations. The linear regression line for peephole optimisations starts
 above the base stack output, this is likely due to the small size of the data
 set --- overall the line's gradient is shallower than the base output, implying
 that the results would continue to improve for larger block sizes.
 
-Figures~\ref{fig:instructionperblock} \&~\ref{fig:meminstructionperblock} also
+Figures~\ref{fig:instructionperblock} and~\ref{fig:meminstructionperblock} also
 show the relationship of register instructions to stack instructions quite well,
-with 1 register instruction generating between 4 \& 5 stack instructions
+with one register instruction generating between 4 and 5 stack instructions
 depending on the optimisation level. The memory accesses are even more
 interesting, with Koopman's stack scheduling getting the ratio of register
-instructions to memory accesses down to just over 1. It would be reasonable to
+instructions to memory accesses down to just over one. It would be reasonable to
 conclude then that the stack-scheduling does in fact remove many of the
 unnecessary memory accesses. Contrary to the conclusions of
-Figures~\ref{fig:relativeinstructions} \&~\ref{fig:relativememinstructions} as
+Figures~\ref{fig:relativeinstructions} and~\ref{fig:relativememinstructions} as
 presented above, this seems to go much further to validate Koopman's claim of
 near total removal of redundant memory accesses as it shows that register
 machines are not inherently any better than stack machines in terms of the
@@ -449,18 +448,19 @@ stack.
 
 The effects of the instruction snippet cache are more impressive. As seen
 Figure~\ref{fig:progcost} (with raw data in Tables~\ref{tab:costnocaching}
-\&~\ref{tab:costcaching}), each optimisation level decreases cost in a similar
+and~\ref{tab:costcaching}), each optimisation level decreases cost in a similar
 fashion to the raw instruction counts discussed earlier. However, caching these
 instruction blocks leads to some significant decreases in program cost for
-highly looping programs, like \texttt{bsort} \& \texttt{primes}. Caching notably
-has no effect on \texttt{fib20} and hardly any on \texttt{tri100} --- this is
-down to the simplicity of the programs involved as they make very little use of
-branching to change to a different block, only branching within the block is
-used. While the costs of each instruction are only estimates
+highly looping programs, like \texttt{bsort} and \texttt{primes}. Caching
+notably has no effect on \texttt{fib20} and hardly any on \texttt{tri100} ---
+this is down to the simplicity of the programs involved as they make very little
+use of branching to change to a different block, only branching within the block
+is used. While the costs of each instruction are only estimates
 (Table~\ref{tab:memmodel}), it shows the potential effectiveness of the
 instruction caching well. The estimated cost of converting register instructions
-is likely quite high compared to reality, so further improvements may be
-available depending on its actual efficiency.
+is high compared to reality, given the model's unconditional cost of instruction
+translation (at 10x number of instructions) which would vary more in practice,
+so further improvements may be available depending on its actual efficiency.
 
 Overall, this is a very positive result, as while the generated stack programs a
 lot larger in instruction count, the memory usages are approximately equivalent.
@@ -474,44 +474,42 @@ example, for the J5 assembly language, it would be useful to have a
 the \texttt{STORE}, to save having to hardcode a separate \texttt{SET}
 instruction to put a value onto the stack for each instruction. A further
 advanced step would be to vary the produced stack code depending on its
-contents, if a particular group of register instructions could be replaced with
-something simpler than the ``standard'' generated code. A simple example of that
-in this project is the peephole optimisation done on converting \texttt{SET 1}
-\& \texttt{ADD} instructions to an \texttt{INC} instruction. It's not done at
-the initial translation, and the register instruction set lacks a similar
+contents, i.e.\ if a particular group of register instructions could be replaced
+with something simpler than the `standard' generated code. A simple example of
+that in this project is the peephole optimisation done on converting \texttt{SET
+1} and \texttt{ADD} instructions to an \texttt{INC} instruction. It's not done
+at the initial translation and the register instruction set lacks a similar
 instruction.
 
 \subsection{Completion of requirements}
 All key features of the project were completed, but only one of the desirable
 features was able to be partially implemented, largely due to time constraints.
 
-Requirements~\ref{itm:register} \&~\ref{itm:stack} (implementing the emulators)
+Requirements~\ref{itm:register} and~\ref{itm:stack} (implementing the emulators)
 were both fully implemented, with working parsers for their respective assembly
 languages and able to interpret and execute any program in that language, with a
-fully implemented instruction set.
-Code generation was also fully implemented (Requirement~\ref{itm:generate}) that
-was free of side effects.
-The two key optimisation methods (Requirement~\ref{itm:optimise}) were
-also implemented, including commandline flags to enable/disable them when
-required (similarly to optimise flags in C++ compilers)
-These flags were used to get several sets of results
-(Requirement~\ref{itm:results}) focusing on length of generated code with each
-optimisation level, and the number of memory accesses they did.
+fully implemented instruction set.  Code generation was also fully implemented
+(Requirement~\ref{itm:generate}) that was free of side effects.  The two key
+optimisation methods (Requirement~\ref{itm:optimise}) were also implemented,
+including commandline flags to enable/disable them when required (similarly to
+optimise flags in C++ compilers) These flags were used to get several sets of
+results (Requirement~\ref{itm:results}) focusing on length of generated code
+with each optimisation level and the number of memory accesses they did.
 
 Unfortunately, the additional requirements (notably
-Requirements~\ref{itm:moreoptimise} \&~\ref{itm:visualise}) were not able to be
+Requirements~\ref{itm:moreoptimise} and~\ref{itm:visualise}) were not able to be
 implemented, largely due to time constraints on the project. While the tool did
 have various debugging levels for which to get output out of, the interface was
 rather crude and the data output needed some transformations (using a python
 testing interface and \texttt{grep}) to get meaningful results out of, so it
-would've been preferrable to have nicer interfaces. However, there was partial
-completion of Requirement~\ref{itm:caching}, in that each converted block was
-cached, but there was no concept of a `threshold' at which to convert them. This
-would've been useful as the expense of converting and caching the initalisation
-routines (that set all the input data) is likely too much compared to just
-running them, bringing up the `program cost' of the program as discussed in the
-results above. It would be preferable to only convert \& cache loops that are
-executed lots of times.
+would've been preferrable to have a user interfaces for collecting data from.
+However, there was partial completion of Requirement~\ref{itm:caching}, in that
+each converted block was cached, but there was no concept of a `threshold' at
+which to convert them. This would have been useful as the expense of converting
+and caching the initalisation routines (that set all the input data) is likely
+too much compared to just running them, bringing up the `program cost' of the
+program as discussed in the results above. It would be preferable to only
+convert and cache loops that are executed lots of times.
 
 \subsection{Program correctness}
 No significant automated testing of the implementation has been done. Instead
@@ -519,16 +517,16 @@ the program's output was verified ``by eye'' and for the test run the multiple
 executions were compared against each other, to ensure consistent results.
 
 \subsection{Code quality}
-The code itself is relatively extensible for future work. It is published as
+The code itself is fairly extensible for future work. It is published as
 open-source software at \texttt{github.com/LordAro/reg2stack} enabling any
 future work to be able to be built on top of this software. The peephole
 optimsation implementation allows for easy additions --- just add the relevant
 function and add the function name to the list of existing functions.
 
-Documentation of the code could definitely be improved. While complicated code
-generally has comments explaining exactly why it does what it does, it's by no
-means complete and could certainly be expanded. Many functions are also missing
-`doccoments', which generally take the form of comments above the function
-definition which can then be parsed by some external tool to generate more
-formal documentation. If this were expanded it would be really helpful to future
-work done on the program.
+Documentation of the code could definitely be improved. While the complicated
+sections of code generally has comments explaining exactly why it does what it
+does, it's by no means complete and more code could benefit from comments. Many
+functions are also missing `doc-comments', which generally take the form of
+comments above the function definition which can then be parsed by some external
+tool to generate more formal documentation. If this were expanded it would be
+really helpful to future work on the program.

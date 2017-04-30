@@ -1,153 +1,12 @@
 \chapter{Design and Implementation}\label{ch:designimplementation}
 
-An early decision to be made was to write emulators for the register \& stack
-machines chosen. Toolchains for `obscure' architectures such as the ones likely
-to be chosen tend to be rather limited in nature and either out-of-date, broken
-or both. Writing emulators for the architectures creates extra programming
-work, but means that the choices of programming language and style are much
-greater.
-
-It was then decided that to simplify the design, the program would be interpret
-assembly source code of the register \& stack architectures instead of running
-the compiled binary. Doing it this way is only an abstraction over actually
-reading the binaries, and skips out having to compile the source code and then
-decode it again. Relatively speaking, it would not be difficult to make a
-program that does this but was deemed unnecessary for the core part of this
-project, converting a register-based instruction set to a stack-based one.
-
-\section{Programming language choice}
-C++ is a systems programming language that is well known for it's hugely
-powerful templates for generic programming, its ability to use multiparadigm
-styles of programming and its high speed, with significant work being put into
-optimising compilers for the language. Using object-orientated-programming, the
-conversion routines can be built on top of one of the emulators, with little
-duplication of code.
-
-C++ does have some disadvantages however. Its (relatively) low-level nature and
-power makes it easy to make errors in programming and logic, and its compiler
-errors for templates are infamous for taking up many pages. In fact, C++'s own
-creator has been quoted as saying ``C makes it easy to shoot yourself in the
-foot; C++ makes it harder, but when you do it blows your whole leg off'' when
-comparing C++ to its parent language C. That said, modern C++ has been making
-big improvements to the language since 2011, with smart pointers, lambdas \&
-type deduction fixing many of the language's major criticisms.
-
-Some thought was put into other higher-level languages, such as Python, but as
-these languages are interpreted instead of compiled, they incur an inherent
-speed penalty by comparison which with a speed sensitive project such as this
-where the emulators need to complete executing instructions in a specified
-amount of time is not a thing that is desirable to be worrying about.
-
-With all this in mind, it was decided that existing familiarity with the C++
-language was important as were the benefits of not having to worry about the
-speed of the emulators themselves for development outweighed the disadvantages.
-
-\section{Architecture choices}
-An immediate shortlist of register architectures was drawn up, of the Z80, the
-Picoblaze, and the DCPU-16.
-
-The Zilog Z80 is a microprocessor introduced in 1976. It is 8-bit based with the
-capability to address 64KB of memory by means of combining its registers. An
-extremely popular processor during the 1980s, it is still produced to this day
-for uses in embedded systems. It has its own assembly language that has both
-register and stack elements. Xilinx's Picoblaze is a `soft processor core',
-meaning that isn't manufactured specially, rather is fabricated on an FPGA
-(field-programmable gate array) by the user. It uses an 8-bit RISC architecture,
-which makes it very simple to fabricate and run. The DCPU-16 isn't actually a
-real processor, and has never been produced. It is the invention of Markus
-Persson to be emulated as part of a game he was creating that never ended up
-getting finished, but there was significant interest in it, which means that
-there was many programs and emulators produced for the processor regardless.
-It's a 16-bit processor that has modularity in mind in the architecture --- the
-computer would `connect' to peripherals to do its IO instead of a more common
-console output interface.
-
-\noindent\begin{minipage}{0.5\textwidth}
-\begin{lstlisting}[caption={Z80 ASM}]
-      LD a, 0
-      LD (CURCOL), a
-      LD (CURROW), a
-      LD hl, text
-      B_CALL(_PutS)
-      RET
-text:
-      .db "Hello, world!", 0
-\end{lstlisting}%
-\end{minipage}%
-\noindent\begin{minipage}{0.5\textwidth}
-\begin{lstlisting}[caption={Picoblaze ASM}]
-module hello_world;
-
-initial begin
-  $display ("Hello, world!");
-  #10 $finish;
-end
-
-endmodule
-\end{lstlisting}%
-\end{minipage}
-
-\noindent\begin{minipage}{\linewidth} %prevent page break
-\begin{lstlisting}[caption={DCPU-16 ASM}]
-; Attach screen
-SET A, 0
-SET B, vram
-HWI 0
-
-SET J, 0
-
-:loop
-SET I, vram
-ADD I, J
-ADD [I], 0x2000
-ADD J, 1
-IFN J, 12
-    SET PC, loop
-
-:crash
-SET PC, crash
-
-:vram
-DAT "Hello, world!", 0
-\end{lstlisting}%
-\end{minipage}
-
-As the Picoblaze is a soft-processor, it is separated into its ASM and Verilog
-components and you have to connect the processor's `wires' together yourself. It
-was decided that this would be too much boilerplate to be worth the effort, so
-the Picoblaze was discounted. After some initial emulator implementation for the
-Z80 processor, it was found that its ability to combine registers were not easy
-to implement in a good way in C++, so after some thought it was decided to
-continue with the DCPU-16 assembly language, after cutting it down to get rid of
-the peripherals part of the language which isn't necessary for this project.
-
-In terms of stack architectures, Forth, JVM bytecode, and J5 were shortlisted.
-
-Forth is a very early programming languages that dates from 1970, when stack
-machines were still common in everyday computing. It's a very simple compiled
-language that still finds uses today in embedded systems due to how easy it is
-to port to new systems, and its low memory overhead. J5 is a teaching stack
-language to introduce people to stack machines and their respective languages
-and it is very simple in that regard, drawing on ideas from various different
-actual stack languages.
-
-\noindent\begin{minipage}{0.5\textwidth}
-\begin{lstlisting}[caption={Forth ASM}]
-CR .( Hello, world!)
-\end{lstlisting}
-\end{minipage}%
-\noindent\begin{minipage}{0.5\textwidth}
-\begin{lstlisting}[caption={J5 ASM}]
-OUT "Hello, world!"
-\end{lstlisting}
-\end{minipage}
-
 \section{Emulator implementation}
-Both emulators (plus the conversion ``emulator'') will be written to be part of
-the same program, with the different functionality controlled with commandline
-flags. This method enables the emulators to share functionality where
-appropriate, especially for the conversion `machine' which can be built directly
-on top of the stack machine using object orientated programming techniques.
+Both the register and stack emulators (plus the conversion ``emulator'') will be
+written to be part of the same program, with the different functionality
+controlled with commandline flags. This method enables the emulators to share
+functionality where appropriate, especially for the conversion `machine' which
+can be built directly on top of the stack machine using object orientated
+programming techniques.
 
 Early in the implementation, it was decided to cut down on the instructions that
 the emulators, as they were either esoteric or difficult to implement while
@@ -158,7 +17,8 @@ implement a `reverse stack' starting at the top of the memory, 0xffff. Since
 this project tests converting register code to stack code, it doesn't make much
 sense to have most of a stack in the register architecture. This does exclude
 the possibility of having a call stack, with procedures or functions, but this
-is an acceptable compromise.
+is an acceptable compromise as they can be emulated by branching instructions
+instead.
 
 Similarly, the J5 (see Appendix~\ref{ch:j5spec}) includes \lstinline{CALL nn} \&
 \lstinline{RETURN} instructions, so for feature parity it was decided to exclude
@@ -166,14 +26,14 @@ these as well. The J5 also has a \lstinline{SSET n} function, which is intended
 as a fast version of \lstinline{SET nn} for small numbers. Since this is an
 emulator, this can be replaced with \lstinline{SET} quite trivially. However, if
 it were included, it would be a good target for optimisation, as since the
-operand is constant, it would be trivial to replae the \lstinline{SET}
+operand is constant, it would be trivial to replace the \lstinline{SET}
 instruction with \lstinline{SSET} where appropriate.
 
 \subsection{Algorithms used}
 The general structure for both emulators is fairly similar. First the input
 file is read into memory. It is then iterated over, line-by-line, and tokenised
 into an intermediary representation, which serves to validate the input syntax.
-This can be approximated with the following psuedocode for the register
+This can be approximated with the following pseudocode for the register
 architecture:
 
 \begin{lstlisting}[caption={Tokenising algorithm for the DCPU-16}]
@@ -203,23 +63,23 @@ It was quite difficult to determine the type of the operands from the source.
 C++ in particular made it difficult due to its type system. The eventual
 solution was to use a variant (typesafe union) type to store integers (for
 literals), register references, and strings for everything else. This
-necessitated the use of a third-party library, boost, as C++ does not have such
-a type in it's standard library just yet, although it does gain one in C++17,
-the latest standard that as of writing is not yet fully implemented by the
-common compilers. Boost is a large and complicated library, but if usage is
+necessitated the use of a third-party library, Boost, as C++ does not have such
+a type in its standard library, although it does gain one in C++17, the latest
+standard that as of 2017 is not yet fully included in a stable release of any of
+the common compilers. Boost is a large and complicated library, but if usage is
 limited to only required features it won't increase maintenance costs
-significantly.
-Using strings for the ``everything else'' part of the operand proved to be quite
-complicated as it included not only labels and string literals, but memory
-address lookups as well (e.g.  \lstinline{SET [2000], 42}). For executing
-purposes it was possible to check if the string started and ended with `[' \&
-`]' respectively, and getting the value of the operand inside. This was further
-complicated as the DCPU-16 has the ability to use compound expressions inside
-the memory address brackets, e.g.  \lstinline{[2000+I]} where the contents of
-the `I' register is added to 2000 to get the memory address referred to. A
-similar solution was made for the stack emulator.
+significantly.  Using strings for the ``everything else'' part of the operand
+proved to be quite complicated as it included not only labels and string
+literals, but memory address lookups as well (e.g.  \lstinline{SET [2000], 42}).
+For executing purposes it was possible to check if the string started and ended
+with \texttt{\rbrack} and \texttt{\rbrack} respectively, and getting the value
+of the operand inside. This was further complicated as the DCPU-16 has the
+ability to use compound expressions inside the memory address brackets, e.g.
+\lstinline{[2000+I]} where the contents of the `I' register is added to 2000 to
+get the memory address referred to. A similar solution was made for the stack
+emulator.
 
-For running the emulators themselves, they provided a \lstinline{run} function,
+For running the emulators themselves, they provide a \lstinline{run} function,
 which is passed the tokenised program to run (along with any flags such as
 verbosity of output). It then initialises the machine's state and runs through
 each instruction in the program until terminated or it reaches the end.
@@ -234,11 +94,11 @@ procedure run(program: Program, flags..)
   end
 \end{lstlisting}
 
-The above is an overly simplistic view of the actual function though, which has
-the ability to run at a certain clock speed (to mimic the speed the actual
-processor would process instructions) or just as fast as the emulator can run,
-which is more useful for testing purposes. There's also a verbosity flag which
-dumps the state of the machine, for debugging purposes.
+The above is a simple view of the actual function though, which has the ability
+to run at a certain clock speed (to mimic the speed the actual processor would
+process instructions) or just as fast as the emulator can run, which is more
+useful for testing purposes. There's also a verbosity flag which dumps the state
+of the machine, for debugging purposes.
 
 For each parsed instruction, a member function for the class of the relevant
 emulator was written. To link each of these methods to their respective
@@ -273,13 +133,13 @@ over branching. It also has \lstinline{BRANCH} for unconditionally branching.
 \section{Conversion routines}
 Initially, the conversion was done all at once --- the program would take in a
 register program and output a stack program that could be run by the stack
-interpreter. This served well as an initial step, but to get to point of caching
-blocks of code, the implementation had to be changed first to converting one
-instruction at a time and then executing it as the stack machine all at once, to
-converting blocks of instructions and executing them. The process for this can
-be seen in Listing~\ref{convertcache}
+interpreter. This served well as an initial step, but to get to the point of
+caching blocks of code, the implementation had to be changed first to converting
+one instruction at a time and then executing it as the stack machine all at
+once, to converting blocks of instructions and executing them. The process for
+this can be seen in Listing~\ref{lst:convertcache}
 
-\begin{lstlisting}[label=convertcache,caption={Converted instruction
+\begin{lstlisting}[label={lst:convertcache},caption={Converted instruction
 caching},float]
 cache: map positions to stack code;
 function convert_instructions(start_pos: instruction)
@@ -290,22 +150,22 @@ function convert_instructions(start_pos: instruction)
 \end{lstlisting}
 
 Table~\ref{tab:conversionexs} is a table that shows some examples of the stack
-code produced for some register instructions.  By way of explanation, for the
-\lstinline{ADD A, B} row the code snippet first loads register A (represented
-by 8191) onto the stack, loading register B (8190) onto the stack, adding them
+code produced for some register instructions. By way of explanation, for the
+\lstinline{ADD A, B} row the code snippet first loads register A (represented by
+8191) onto the stack, loading register B (8190) onto the stack, adding them
 together, and storing the result back into A. The DCPU-16's \lstinline{IFx}
 statements are more complex to convert as the J5 does not have a direct
 equivalent. The \lstinline{IFx} instruction only executes the next instruction
 if the condition (e.g. \lstinline{B != A} for \lstinline{IFN B, A}) evaluates to
-true. For the J5, its only conditional branching mechanism is \lstinline{BRZERO}
+true. For the J5, the only conditional branching mechanism is \lstinline{BRZERO}
 and a series of `test' instructions, that have to be executed before hand and
 set a flag to signify whether its test is true or not. So, the conversion
 routine needs to load the operands for the statement onto the stack, test the
 operands on the stack, the drop the operands (so not to leave them ``dangling''
 on the stack regardless of the condition result), then \lstinline{BRZERO} with
-an operand that's equal to the generated length of the next instruction.
-Implementation-wise, it's necessary to leave a temporary value for the operand
-initially, then go back and change it once the next instruction has been
+an operand that's equal to the generated length of the next instruction.  With
+regard to implementation, it was necessary to leave a temporary value for the
+operand initially, then go back and change it once the next instruction had been
 converted.
 
 The implementation of this is particularly nice as the functions which load the
@@ -385,7 +245,7 @@ instructions.
 \subsection{Peephole optimisation}
 A number of peephole optimisations were implemented as part of the optimisation
 process. A list of them can be seen in Table~\ref{tab:peepholeex}. While it has
-some affect just on its own, typically around the `edges' of generated stack
+some effect on its own, typically around the `edges' of generated stack
 code, it tends to have greater effect following a stack scheduling pass.
 
 The optimiser iterates over the program (which is again separated into regions
@@ -465,8 +325,8 @@ Removes unused stack usage \\ \bottomrule
 \end{table}
 
 \subsection{Stack scheduling}
-Stack scheduling is relatively simple to implement and is described in
-pseudocode by Listing~\ref{lst:schedule}.
+Stack scheduling was simple to implement and is described in pseudocode by
+Listing~\ref{lst:schedule}.
 
 \begin{lstlisting}[caption={Stack scheduling
 implementation},float,label=lst:schedule]
@@ -522,7 +382,7 @@ be determined statically as all instructions have a known behaviour (whether
 they remove or add values to the stack).
 
 An example of what this algorithm produces is listed in
-Table~\ref{tab:scheduleex}. It's worth nothing that even though the stack code
+Table~\ref{tab:scheduleex}. It's worth noting that even though the stack code
 produced by the stack scheduling is only 3 instructions shorter, it only
 contains 6 memory read/writes, compared to 10 for the initial unoptimised stack
 code which is a 40\% reduction.
@@ -593,12 +453,11 @@ STORE
 \end{table}
 
 Due to the na{\"\i}vity of how the blocks are determined (splitting on labels),
-if a loop doesn't have any following labels code following the loop can be
-included in the block. This causes issues with the stack-scheduling optimiser as
-it may find pairs of STORE/LOAD which are actually outside the block. Due to
-time-constraints it was not possible to implement a better block-finding
-algorithm, so a workaround is to add an (unused) label at the actual logical end
-of the block.
+if a loop doesn't have any labels that segment the code that follows the end of
+the loop, it will also be included in the block.  This causes issues with the
+stack-scheduling optimiser as it may find pairs of STORE/LOAD which are actually
+outside the block. For the purposes of this project, an (unused) label at the
+actual logical end of the block.
 
 \section{Overall structure}
 The overall structure of how the translator performs is shown in
@@ -609,7 +468,10 @@ code, but lacks the translation threshold and the ability to rollback and
 interpret the instruction in the register language. While this implementation
 can interpret the register code, it cannot switch between that and translating
 in a single run. This diagram also shows the control flow for the optimisation
-patterns which Transmeta's diagram lacks.
+patterns which Transmeta's diagram lacks. Similarly to the Transmeta diagram, it
+also doesn't show the end condition of the Interpreter/Translator combination,
+when the program counter reaches the end of the program, or an unrecoverable
+fault occurs.
 
 \begin{figure}
   \begin{tikzpicture}[node distance=3cm, on grid, auto, >=stealth, thick,
@@ -621,8 +483,8 @@ patterns which Transmeta's diagram lacks.
 
     \begin{scope}[on background layer]
       \fill[blue!60!,opacity=.3] (-4, 1) rectangle (9,-16);
-      \fill[white] (-4, 1) rectangle (2.5, -7.5);
-      \fill[blue!25!,opacity=.3] (-4, 1) rectangle (2.5, -7.5);
+      \fill[white] (-4, 1) rectangle (3, -7.5);
+      \fill[blue!25!,opacity=.3] (-4, 1) rectangle (3, -7.5);
       \node[right] at (-4,.5) {\textbf{Interpreter}};
       \node[left] at (9,.5) {\textbf{Translator}};
     \end{scope}
@@ -667,26 +529,24 @@ algorithms. First was an implementation of bubble sort that sorted 32 16-bit
 numbers, one of the more complex programs, having nested loops. Next was a
 Fibonacci program that output the first 20 numbers in the Fibonacci sequence.
 This was the simplest program, with a single loop. A prime calculator was next,
-which used a prime sieve to find all the prime numbers up to 100. While had
+which used a prime sieve to find all the prime numbers up to 100. Whilst it had
 similarly nested loops like the bubble sort program, it was implemented in a way
 such that the loops were actually separated out in the program, so that it
-branched a lot more than it would've done otherwise. Lastly there was the
+branched a lot more than it would have done otherwise. Lastly there was the
 triangle number calculator, which calculated the first 100 triangle numbers
-($T_{n} = n(n+1)/2$).
-
-The contents of these programs can be seen in
+($T_{n} = n(n+1)/2$). The contents of these programs can be seen in
 Appendix~\ref{ch:benchmarkprograms}.
 
 For getting results out, the programs would have to be converted several times
 with various different commandline flags for the register vs stack conversion
 and for the different optimisation levels. For this a simple `test harness' was
-written in python, which looped through all the programs, generating the correct
+written in Python, which looped through all the programs, generating the correct
 flags for running them, and ran them, capturing their outputs. First check was
-to check equality of the converted code output with the output of the standard
-register emulator. This of course wouldn't suffice of both emulators were
-incorrect, but checking that `by eye' sufficed for that. Then the register code
-was converted with each level of optimisation and the output of which is
-captured and parsed. The emulator was writting in such a way that at a certain
+to check the equality of the converted code output with the output of the
+standard register emulator. This check would not suffice if both emulators were
+incorrect, but in practice checking `by eye' was satisfactory. Then the register
+code was converted with each level of optimisation and the output of which is
+captured and parsed. The emulator was writing in such a way that at a certain
 debug level it would include every instruction that had been run, or information
 about instruction caching. After some pattern matching on this output was done,
 numerical results were obtained.
