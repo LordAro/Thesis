@@ -149,8 +149,8 @@ language. Unlike the other languages discussed here, its type system is dynamic,
 meaning that variables can be reassigned to different types, which helps with
 the ease of programming in it. Also unlike the other languages here, it is an
 interpreted language (instead of compiled). While this has its advantages,
-mostly with the speed of development, it has a big impact on the speed of the
-language by comparison.
+mostly with the speed of prototyping and development, it has a big impact on the
+speed of the language by comparison.
 
 \subsubsection{Go}
 Go (often called Golang) is also a new systems programming language. It is
@@ -177,24 +177,25 @@ programming errors and the language's verbosity over a high-level language.
 \subsection{Architecture choices}
 
 \subsubsection{Register architectures}
+
 A shortlist of register architectures was drawn up, of the Zilog Z80, the Xilinx
-Picoblaze, and the DCPU-16. The Z80 is a microprocessor introduced in 1976. It
-is 8-bit based with the capability to address 64KB of memory by means of
-combining its registers. An extremely popular processor during the 1980s, it is
-still used in embedded systems. It has its own assembly language that has both
-register and stack elements. The Picoblaze is a `soft processor core', meaning
-that is not manufactured specially, rather is fabricated on an FPGA
+Picoblaze, and the DCPU-16. The Z80 is a microprocessor originally introduced in
+1976. It is 8-bit based with the capability to address 64KB of memory by means
+of combining its registers. An extremely popular processor during the 1980s, it
+is still used in embedded systems. It has its own assembly language that has
+both register and stack elements. The Picoblaze is a `soft processor core',
+meaning that is not manufactured specially, rather is fabricated on an FPGA
 (field-programmable gate array) by the user. It uses an 8-bit RISC architecture,
 which makes it very simple to fabricate and run. The DCPU-16 is not a real
 processor, and has never been produced. It is the invention of Markus Persson in
-2011 to be emulated as part of a game he was creating that never completed, but
-there was significant interest in it, which means that there was many programs
-and emulators produced for the DCPU-16 processor. It is a 16-bit processor that
-has modularity in mind in the architecture --- the computer would `connect' to
-peripherals to do its IO instead of a more common console output interface.
-Listings~\ref{lst:z80asm},\ref{lst:picoasm} and~\ref{lst:dcpuasm} show examples
-of a ``Hello World'' program in the respective assembly languages of the Z80,
-Picoblaze and DCPU-16.
+2011 to be emulated as part of a game he was creating but never completed,
+however there was significant interest in it, which means that there was many
+programs and emulators produced for the DCPU-16 processor. It is a 16-bit
+processor that has modularity in mind in the architecture --- the computer would
+`connect' to peripherals to do its IO instead of a more common console output
+interface.  Listings~\ref{lst:z80asm},~\ref{lst:picoasm} and~\ref{lst:dcpuasm}
+show examples of a ``Hello World'' program in the respective assembly languages
+of the Z80, Picoblaze and DCPU-16.
 
 \noindent\begin{minipage}{0.5\textwidth}
 \begin{lstlisting}[caption={Z80 ASM},label={lst:z80asm}]
@@ -238,6 +239,7 @@ ADD J, 1
 IFN J, 12
     SET PC, loop
 
+; loop forever to end
 :crash
 SET PC, crash
 

@@ -9,7 +9,7 @@ separate parts --- Central Arithmetic (CA); Central Control (CC); Memory; Input;
 Output and External Memory (at the time, this was intended to be something like
 punched tape). These components were described using the human nervous sytem as
 an analogy, with the CA, CC \& Memory acting as associative (linking) neurons,
-the Input \& Output acting as sensory \& motor neurons respectively.
+and the Input \& Output acting as sensory \& motor neurons respectively.
 Von~Neumann also wanted to keep the computer as simple as possible, so suggested
 that arithmetic operations (such as add and multiply) should not be overlapped,
 and performed only one digit (this being before bits and bytes were named as
@@ -49,7 +49,7 @@ computations. There are a number of different types of register, with data
 registers storing numerical values, address registers storing memory addresses
 for accessing system memory, general purpose registers store both data and
 addresses, flag registers for storing states of previous Boolean (true or false)
-test operations, and various others. There is also often an instruction
+test operations, and various others. Often there is also an instruction
 register that is not accessible to the program running on the CPU, but the CPU
 uses to refer to the current instruction that is being
 executed~\cite{Mittal2016RegisterFile}\cite{Patterson2011Computer}.
@@ -88,8 +88,8 @@ instruction sets afforded by the stack greatly simplifying compiler design.
 However, by the 1970s it had fallen out of favour~\cite{Myers1977CAS}, with
 improvements in compiler design making memory-to-memory architectures (or
 register based) more appealing. A common criticism was that stack architectures
-necessitated the use of memory locations as imitations of registers, which slow
-the architectures down.
+necessitated the use of memory locations as imitations of registers, which
+slowed the architectures down.
 
 Instead of having named registers to store values as part of computations, stack
 machines use a stack data structure to store the computationally active
@@ -120,7 +120,7 @@ of a spiral, making stack machines less and less appealing for additional usage.
 Despite this, there has been significant work in the area of compiling these
 `conventional' languages to a stack executation model. One of the main areas of
 research has been focused on fixing the repeated loading and storing to the same
-memory location that na{\"\i}ve compilation tends to produce.
+memory location that the na{\"\i}ve compilation model tends to produce.
 
 Peephole optimisations are a method that can be applied to register and stack
 architectures alike, with the effect of removing redundant instructions from
@@ -258,7 +258,7 @@ collected information on the instructions running on it, for example how often
 particular instructions were executed, what IO operations are performed, and
 which direction branches took.  This monitoring allowed the CMS to selectively
 take often-run sections of x86 code and translate them into native VLIW code,
-which was then stored in the `translation cache' for future lookup and use, as
+which was then stored in a `translation cache' for future lookup and use, as
 seen in the flow chart in Figure~\ref{fig:cmsctrlflow}.
 
 \begin{figure}
@@ -324,23 +324,25 @@ processor was able to emulate enough of the x86 instruction set to run Microsoft
 Windows and several applications including web browsers, it often crashed and
 weaknesses in the processor itself and how its components were connected
 (notably a complete lack of an Advanced Graphics Port for 3D performance).
-Investigations indicated that the CMS was actually being very underused in
-actual applications with its component `molecules' (the processor's 128-bit
-instruction word) only hampering its performance. Even in synthetic benchmark
-programs the processor's performance only rarely approached similar speeds of
-processors contemporary to it the Intel Pentium III or the AMD Athlon XP\@.
-These performance issues, among others, were largely blamed on the very large
-(for the time) 128-byte L2 CPU cache, meaning that it both negatively affected
-performance on code high in branching, as it had to pull in a full 128-bytes
-even if it only required a single byte, and also was not enough cache to hold
-both the CMS and the translated code, causing excessive memory thrashing.
+Investigations indicated that the underlying processor was actually being very
+underused by the CMS in actual applications with the CMS's component `molecules'
+(a 128-bit instruction word) only hampering its performance. Even in synthetic
+benchmark programs the processor's performance only rarely approached similar
+speeds of processors contemporary to it such as the Intel Pentium III or the AMD
+Athlon XP\@. These performance issues, among others, were largely blamed on the
+very large (for the time) 128-byte L2 CPU cache, meaning that it both negatively
+affected performance on code high in branching, as it had to pull in a full
+128-bytes even if it only required a single byte, and also was not enough cache
+to hold both the CMS and the translated code, causing excessive memory
+thrashing.
 
 Attempting to address these concerns, Transmeta developed a new processor, the
 Efficeon, that addressed many of the concerned raised about the Crusoe, but even
 with its 256-bit wide instruction word, die size twice as large as its
 predecessor and doubled clock speed, it still had performance issues compared to
 contemporary processors and even often thermal throttling itself in
-benchmarking, so failed to make any significant impact in the computing
+benchmarking, and die size significantly increasing the cost of the processor,
+so failed to make any significant impact in the computing
 world~\cite{TrackingTransmetaEfficeon}.
 
 \begin{figure}

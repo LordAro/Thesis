@@ -13,13 +13,13 @@ accesses made by the stack program, as stack-scheduling is supposed to be able
 to significantly reduce redundant memory accesses produced by emulating
 registers as memory.
 
-Using a simple memory model, a basic figure for ``program cost'' can be
-produced. While there is no equivalent available for the source register-based
-programs, it is beneficial to see the difference between each optimisation
-level. The memory model is also used to measure the effect of the translation
-cache, by giving the conversion and caching of the register code an (estimated)
-high cost, to simulate the effects of not having to convert heavily-used loops
-many times over.
+Using a simple memory model, a basic figure for `program cost' can be produced.
+While there is no equivalent available for the source register-based programs,
+it is beneficial to see the difference between each optimisation level. The
+memory model is also used to measure the effect of the translation cache, by
+giving the conversion and caching of the register code an (estimated) high cost,
+to simulate the effects of not having to convert heavily-used loops many times
+over.
 
 Testing is done using a series of programs handwritten for the DCPU-16
 emulator. For testing purposes, simple test programs (called \texttt{simple},
@@ -39,12 +39,12 @@ of use. Highly used loops do well to test the translation cache system. The
 programs should also use a wide variety of register instructions to achieve
 better coverage of the translator and emulators.
 
-A common set of tests used for these type of the programs is the Standford
-Benchmark Suite\cite{stanford}. It is a set of programs written in C that are
-fairly short in code and execution time. It also has the advantage of not
-requiring any input, which both the source DCPU-16 and J5 instruction sets lack.
-Examples of programs in it include bubble sort, Tower of Hanoi and a matrix
-multiplication.
+A common set of tests used for these type of the programs is the Stanford
+Benchmark Suite~\cite{stanford}. It is a set of programs written in C that are
+fairly short in code and execution time, meaning that development time is sped
+up by a quick test run. It also has the advantage of not requiring any input,
+which both the source DCPU-16 and J5 instruction sets lack. Examples of
+programs in it include bubble sort, Tower of Hanoi and a matrix multiplication.
 
 However, since the implementation in this project lacks any sort of subroutine
 or function support, many of the programs would be quite difficult to feasibly
@@ -398,10 +398,12 @@ running the benchmarking programs with the memory model described in
 Table~\ref{tab:memmodel}. The two tables are represented in
 Figure~\ref{fig:progcost}.
 
+\clearpage
+
 \section{Evaluation}\label{sec:testingevaluation}
 
 The basic results (seen in Table~\ref{tab:instructions} and
-Figure~\ref{fig:relativeinstructions}) are somewhat counter-intuative, showing
+Figure~\ref{fig:relativeinstructions}) are somewhat counter-intuitive, showing
 that the peephole optimisation stage does the bulk of the the overall executed
 instruction count reduction and that Koopman-style stack scheduling has very
 little effect.However, looking at the number of memory reads and writes (with
@@ -529,16 +531,16 @@ the program's output is only verified `by eye' and for the test run the multiple
 executions are compared against each other, to ensure consistent results.
 
 \subsection{Code quality}
-The code itself is fairly extensible for future work. It is published as
+The code itself should be extensible for future work. It is published as
 open-source software at \texttt{github.com/LordAro/reg2stack} enabling any
 future work to be able to be built on top of this software. The peephole
 optimisation implementation allows for easy additions --- just add the relevant
 function and add the function name to the existing list of functions.
 
-Documentation of the code could definitely be improved. While the complicated
-sections of code generally has comments explaining exactly why it does what it
-does, it is by no means complete and more code could benefit from comments. Many
-functions are also missing `doc-comments', which generally take the form of
-comments above the function definition which can then be parsed by some external
-tool to generate more formal documentation. If this were expanded, it would be
-really helpful to future work on the program.
+Documentation of the code could be improved. While the complicated sections of
+code generally have comments explaining exactly why it does what it does, it is
+by no means complete and more code could benefit from comments. Many functions
+are also missing `doc-comments', which generally take the form of comments above
+the function definition which can then be parsed by some external tool to
+generate more formal documentation. If this were expanded, it would be really
+helpful to future work on the program.

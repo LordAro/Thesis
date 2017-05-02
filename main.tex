@@ -22,6 +22,7 @@
 \usepackage{tikz}
 \usepackage{pgfplotstable}
 \usetikzlibrary{chains,shapes,arrows,positioning,backgrounds}
+
 \pgfplotsset{compat=1.14}
 
 \newenvironment{changemargin}[2]{%
@@ -65,15 +66,15 @@
 
 %TC:group lstlisting 0 0
 \begin{abstract}
-This project explores something related to the above experiment. However the
-focus is on translating code to a stack-based architecture and applying
-optimisation techniques to the produced instructions, using a technique called
-stack-scheduling. Research focuses on the history of register and stack-based
-computing, and previous work on stack optimisation techniques. A combined
-translator and interpreter for running register code on a stack machine is
-designed and implemented (\texttt{https://github.com/LordAro/reg2stack}).
-Several different optimisation models implemented by the software are then
-tested and the results of which are evaluated.
+  This project aims to show that by converting code written for a simple
+  register-based architecture or processor to a stack-based architecture,
+  performance improvements can be found.  A review is made of the history of
+  register and stack-based computing, and previous work on stack optimisation
+  techniques.  A combined translator and interpreter for running register code
+  on a stack machine is designed and implemented
+  (\texttt{https://github.com/LordAro/reg2stack}).  Several different
+  optimisation models implemented by the software are then tested, the results
+  of which are evaluated.
 \end{abstract}
 
 \vfill
