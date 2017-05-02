@@ -1,33 +1,32 @@
 \chapter{Design and Implementation}\label{ch:designimplementation}
 
 \section{Emulator implementation}
-Both the register and stack emulators (plus the conversion ``emulator'') will be
+Both the register and stack emulators (plus the conversion ``emulator'') are
 written to be part of the same program, with the different functionality
 controlled with commandline flags. This method enables the emulators to share
 functionality where appropriate, especially for the conversion `machine' which
-can be built directly on top of the stack machine using object orientated
+is built directly on top of the stack machine using object orientated
 programming techniques.
 
 Early in the implementation, it was decided to cut down on the instructions that
 the emulators, as they were either esoteric or difficult to implement while
 being irrelevant to this project. In particular, none of the special opcodes for
-the DCPU-16 (see Appendix~\ref{ch:dcpuspec}) were implemented, and neither were
-the \lstinline{PUSH} or \lstinline{POP} identifiers, as they are used to
-implement a `reverse stack' starting at the top of the memory, 0xffff. Since
-this project tests converting register code to stack code, it doesn't make much
-sense to have most of a stack in the register architecture. This does exclude
-the possibility of having a call stack, with procedures or functions, but this
-is an acceptable compromise as they can be emulated by branching instructions
-instead.
+the DCPU-16 (see Appendix~\ref{ch:dcpuspec}) are implemented, and neither are
+the \texttt{PUSH} or \texttt{POP} instructions, as they are used to implement a
+`reverse stack' starting at the top of the memory, 0xffff. Since this project
+tests converting register code to stack code, it does not make much sense to
+have most of a stack in the register architecture. This does exclude the
+possibility of having a call stack, with procedures or functions, but this is an
+acceptable compromise as they can be emulated by branching instructions instead.
 
-Similarly, the J5 (see Appendix~\ref{ch:j5spec}) includes \lstinline{CALL nn} \&
-\lstinline{RETURN} instructions, so for feature parity it was decided to exclude
-these as well. The J5 also has a \lstinline{SSET n} function, which is intended
-as a fast version of \lstinline{SET nn} for small numbers. Since this is an
-emulator, this can be replaced with \lstinline{SET} quite trivially. However, if
-it were included, it would be a good target for optimisation, as since the
-operand is constant, it would be trivial to replace the \lstinline{SET}
-instruction with \lstinline{SSET} where appropriate.
+Similarly, the J5 (see Appendix~\ref{ch:j5spec}) includes \texttt{CALL nn} \&
+\texttt{RETURN} instructions, so for feature parity these were excluded as well.
+The J5 also has a \texttt{SSET n} function, which is intended as a fast version
+of \texttt{SET nn} for small numbers. Since this is an emulator, this is
+replaced with \texttt{SET} quite trivially. However, if it were included, it
+would be a good target for optimisation, as the operand is constant, it would be
+trivial to replace the \texttt{SET} instruction with a \texttt{SSET} in the
+appropriate places.
 
 \subsection{Algorithms used}
 The general structure for both emulators is fairly similar. First the input
@@ -36,6 +35,7 @@ into an intermediary representation, which serves to validate the input syntax.
 This can be approximated with the following pseudocode for the register
 architecture:
 
+\noindent\begin{minipage}{\linewidth}
 \begin{lstlisting}[caption={Tokenising algorithm for the DCPU-16}]
 function tokenise(filepath: string): instruction
   load file from filepath
@@ -58,31 +58,32 @@ function tokenise(filepath: string): instruction
     return instruction
   end
 \end{lstlisting}
+\end{minipage}
 
-It was quite difficult to determine the type of the operands from the source.
+Determining the type of the operands from the source proved difficult.
 C++ in particular made it difficult due to its type system. The eventual
-solution was to use a variant (typesafe union) type to store integers (for
+solution uses a variant (typesafe union) type to store integers (for
 literals), register references, and strings for everything else. This
 necessitated the use of a third-party library, Boost, as C++ does not have such
-a type in its standard library, although it does gain one in C++17, the latest
+a type in its standard library. Although it does gain one in C++17, the latest
 standard that as of 2017 is not yet fully included in a stable release of any of
 the common compilers. Boost is a large and complicated library, but if usage is
-limited to only required features it won't increase maintenance costs
-significantly.  Using strings for the ``everything else'' part of the operand
-proved to be quite complicated as it included not only labels and string
-literals, but memory address lookups as well (e.g.  \lstinline{SET [2000], 42}).
-For executing purposes it was possible to check if the string started and ended
-with \texttt{\rbrack} and \texttt{\rbrack} respectively, and getting the value
-of the operand inside. This was further complicated as the DCPU-16 has the
+limited to only required features it does not increase maintenance costs
+significantly. Using strings for the `everything else' part of the operand
+proves quite complicated as it includes not only labels and string
+literals, but memory address lookups as well (e.g.\ \texttt{SET [2000], 42}).
+For executing purposes it is possible to check if the string starts and ends
+with \texttt{\lbrack} and \texttt{\rbrack} respectively, and getting the value
+of the operand inside. This is further complicated as the DCPU-16 has the
 ability to use compound expressions inside the memory address brackets, e.g.
-\lstinline{[2000+I]} where the contents of the `I' register is added to 2000 to
-get the memory address referred to. A similar solution was made for the stack
+\texttt{[2000+I]} where the contents of the `I' register is added to 2000 to
+get the memory address referred to. A similar solution is made for the stack
 emulator.
 
-For running the emulators themselves, they provide a \lstinline{run} function,
-which is passed the tokenised program to run (along with any flags such as
-verbosity of output). It then initialises the machine's state and runs through
-each instruction in the program until terminated or it reaches the end.
+For running the emulators themselves, their class provides a \texttt{run}
+function, which is passed the tokenised program to run (along with any flags
+such as verbosity of output). It then initialises the machine's state and runs
+through each instruction in the program until terminated or it reaches the end.
 
 \begin{lstlisting}[caption={Running a DCPU-16 program}]
 procedure run(program: Program, flags..)
@@ -97,47 +98,47 @@ procedure run(program: Program, flags..)
 The above is a simple view of the actual function though, which has the ability
 to run at a certain clock speed (to mimic the speed the actual processor would
 process instructions) or just as fast as the emulator can run, which is more
-useful for testing purposes. There's also a verbosity flag which dumps the state
-of the machine, for debugging purposes.
+useful for testing purposes. There is also a verbosity flag which dumps the
+state of the machine, for debugging purposes.
 
 For each parsed instruction, a member function for the class of the relevant
-emulator was written. To link each of these methods to their respective
-instruction, it seemed best to use a \texttt{std::map} as provided by the
-standard library. In many places, the functions were very short, only consisting
-of a single line of code, so it was decided to make use of C++'s lambdas. This
-meant, for example, that the implementation for the J5's \texttt{INC}
-instruction only consisted of
-\verb|[](machine *m){m->stack.top()++;}| instead of just referring to the
-function pointer \verb|&machine::inc_func| in the class' function map, which
-avoids all the extra code overhead of having to fully declare an extra method.
-Where the instruction implementation functions were beyond a line, the usual
-style was kept to help keep the code readable. Taking this further, it was
-noticed that many of the instructions followed a pattern (for example,
-\texttt{ADD} and \texttt{SUB} from the J5 both operate on the top two items on
-the stack). As the code for these implementations would've otherwise been
-duplicated several times (where only the exact operation differs), a helper
-function was created to deal with these. This resulted in
-\verb|[](machine *m){m->binop_func([](int a, int b){return a+b;});}| which even
-though works as expected, it is decidedly unreadable for anyone looking through
-the code for themselves.
+emulator has been written. To link each of these methods to their respective
+instruction, it is best to use a \texttt{std::map} as provided by the standard
+library. In many places, the functions are very short, only consisting of a
+single line of code, so the code makes use of C++'s lambdas. This means, for
+example, that the implementation for the J5's \texttt{INC} instruction only
+consists of the lambda \texttt{[](machine~*m)\{m->stack.top()++;\}} instead of
+referring to a function pointer such as \lstinline{&machine::inc_func} in the
+class' function map, which avoids all the extra code overhead of having to fully
+declare an extra method. Where the instruction implementation functions were
+beyond a line, the usual function pointer style has been kept to help keep the
+code readable. Taking this, many of the instructions follow a similar pattern
+(for example, \texttt{ADD} and \texttt{SUB} from the J5 both operate on the top
+two items on the stack). As the code for these implementations would have
+otherwise been duplicated several times (where only the exact operation
+differs), a helper function has been created to deal with these. This results in
+the lambda \texttt{[](machine~*m)\{m->binop\_func([](int~a,~int~b)\{return
+a+b;\});\}} which even though works as expected, it is decidedly unreadable for
+anyone looking through the code for themselves.
 
 The function loop also has to deal with the effects of the conditional
-expressions. For the DCPU-16 this is the \lstinline{IFx} statements where they
-only perform the next expression if the condition is true, whereas the the J5
-has some test instructions (e.g. \lstinline{TEQ}) and \lstinline{BRZERO}
-instruction which conditionally branches on whether the test instruction set the
-appropriate flag. The notable thing here is that the test instruction can be
-executed long before the branch is actually taken, which allows for more freedom
-over branching. It also has \lstinline{BRANCH} for unconditionally branching.
+expressions. For the DCPU-16 this is the \texttt{IFx} statements where they only
+perform the next expression if the condition is true, whereas the J5 has some
+test instructions (e.g. \texttt{TEQ}) and \texttt{BRZERO} instruction which
+conditionally branches on whether the test instruction set the appropriate flag.
+The notable thing here is that the test instruction can be executed long before
+the branch is actually taken, which allows for more freedom over branching. It
+also has \texttt{BRANCH} for unconditionally branching.
 
 \section{Conversion routines}
-Initially, the conversion was done all at once --- the program would take in a
-register program and output a stack program that could be run by the stack
-interpreter. This served well as an initial step, but to get to the point of
-caching blocks of code, the implementation had to be changed first to converting
-one instruction at a time and then executing it as the stack machine all at
-once, to converting blocks of instructions and executing them. The process for
-this can be seen in Listing~\ref{lst:convertcache}
+
+Initially, implementation of the conversion was to do it all at once --- the
+program would take in a register program and output a stack program that could
+be run by the stack interpreter. This served well as an initial step, but to get
+to the point of caching blocks of code, the implementation was to be changed
+first to converting one instruction at a time and then executing it as the stack
+machine all at once, to converting blocks of instructions and executing them.
+The process for this can be seen in Listing~\ref{lst:convertcache}
 
 \begin{lstlisting}[label={lst:convertcache},caption={Converted instruction
 caching},float]
@@ -151,32 +152,32 @@ function convert_instructions(start_pos: instruction)
 
 Table~\ref{tab:conversionexs} is a table that shows some examples of the stack
 code produced for some register instructions. By way of explanation, for the
-\lstinline{ADD A, B} row the code snippet first loads register A (represented by
+\texttt{ADD A, B} row the code snippet first loads register A (represented by
 8191) onto the stack, loading register B (8190) onto the stack, adding them
-together, and storing the result back into A. The DCPU-16's \lstinline{IFx}
+together, and storing the result back into A. The DCPU-16's \texttt{IFx}
 statements are more complex to convert as the J5 does not have a direct
-equivalent. The \lstinline{IFx} instruction only executes the next instruction
-if the condition (e.g. \lstinline{B != A} for \lstinline{IFN B, A}) evaluates to
-true. For the J5, the only conditional branching mechanism is \lstinline{BRZERO}
-and a series of `test' instructions, that have to be executed before hand and
-set a flag to signify whether its test is true or not. So, the conversion
-routine needs to load the operands for the statement onto the stack, test the
-operands on the stack, the drop the operands (so not to leave them ``dangling''
-on the stack regardless of the condition result), then \lstinline{BRZERO} with
-an operand that's equal to the generated length of the next instruction.  With
-regard to implementation, it was necessary to leave a temporary value for the
-operand initially, then go back and change it once the next instruction had been
+equivalent. The \texttt{IFx} instruction only executes the next instruction if
+the condition (e.g. \texttt{B != A} for \texttt{IFN B, A}) evaluates to true.
+For the J5, the only conditional branching mechanism is \texttt{BRZERO} and a
+series of `test' instructions, that have to be executed before hand and set a
+flag to signify whether its test is true or not. So, the conversion routine
+needs to load the operands for the statement onto the stack, test the operands
+on the stack, the drop the operands (so not to leave them `dangling' on the
+stack regardless of the condition result), then \texttt{BRZERO} with an operand
+that is equal to the generated length of the next instruction. With regard to
+implementation, it was necessary to leave a temporary value for the operand
+initially, then go back and change it once the next instruction had been
 converted.
 
 The implementation of this is particularly nice as the functions which load the
-instruction operands onto the stack (as in, e.g., \lstinline{ADD B, A}) were
-able to use one another, with minimal code duplication. For example, loading a
+instruction operands onto the stack (as in, e.g., \texttt{ADD B, A}) were able
+to use one another, with minimal code duplication. For example, loading a
 register value onto the stack is just the same as loading an address onto the
-stack but with an extra \lstinline{LOAD} instruction following it. These segment
-functions allowed operands to be loaded onto the stack with no additional
-side effects. A complicated example of this can be seen with the
-\lstinline{SET A, [3000+I]} in Table~\ref{tab:conversionexs} that uses the
-DCPU-16's ability to have arithmetic operations inside memory addresses.
+stack but with an extra \texttt{LOAD} instruction following it. These segment
+functions allow operands to be loaded onto the stack with no additional side
+effects. A complicated example of this can be seen with the \texttt{SET A,
+[3000+I]} in Table~\ref{tab:conversionexs} that uses the DCPU-16's ability to
+have arithmetic operations inside memory addresses.
 
 \begin{table}
 \caption{Instruction conversion examples}
@@ -239,93 +240,81 @@ STORE
 
 
 \section{Optimisation}
-Optimisation was done on the stack code generated by blocks of register
+Optimisation is done on the stack code generated by blocks of register
 instructions.
 
 \subsection{Peephole optimisation}
-A number of peephole optimisations were implemented as part of the optimisation
+A number of peephole optimisations are implemented as part of the optimisation
 process. A list of them can be seen in Table~\ref{tab:peepholeex}. While it has
 some effect on its own, typically around the `edges' of generated stack
 code, it tends to have greater effect following a stack scheduling pass.
 
 The optimiser iterates over the program (which is again separated into regions
-by label) in blocks of a certain size that's determined by the individual
-optimisation. When it finds a block that matches the pattern that it's looking
+by label) in blocks of a certain size that is determined by the individual
+optimisation. When it finds a block that matches the pattern that it is looking
 for, it replaces that block as defined by the optimisation.
 
 % Oh dear.
-\begin{table}
+\noindent\begin{table}
 \caption{Peephole optimisation examples}
-\begin{tabularx}{\linewidth}{l l X}\label{tab:peepholeex}
-Original stack code & Optimised stack code & Notes \\ \toprule
-\begin{lstlisting}^^J
-SET 1^^J
+\begin{tabularx}{\linewidth}{L L X}\label{tab:peepholeex}
+  \bigskip\normalfont{Original\newline stack code} &
+  \bigskip\normalfont{Optimised\newline stack code} &
+  \bigskip Notes \\ \toprule
+SET 1\newline
 ADD
-\end{lstlisting} &
-\begin{lstlisting}^^J
+&
 INC
-\end{lstlisting} &
-Take advantage of the J5's {\lstinline!INC!} instruction \\ \midrule
-\begin{lstlisting}^^J
-SET 1^^J
+&
+Take advantage of the J5's \texttt{INC} instruction \\ \midrule
+SET 1\newline
 SUB
-\end{lstlisting} &
-\begin{lstlisting}^^J
+&
 DEC
-\end{lstlisting} &
+&
 Same as above, but for subtraction \\ \midrule
-\begin{lstlisting}^^J
-SET 0^^J
-TEQ^^J
+SET 0\newline
+TEQ\newline
 DROP
-\end{lstlisting} &
-\begin{lstlisting}^^J
+&
 TSZ
-\end{lstlisting} &
-Generated with an {\lstinline!IFN, x, 0!} statement. Instead take advantage of
-the {\lstinline!TSZ!} instruction of the J5 \\ \midrule
-\begin{lstlisting}^^J
-SET x^^J
-STORE^^J
-SET x^^J
+&
+Generated with an \texttt{IFN, x, 0} statement. Instead take advantage of the
+\texttt{TSZ} instruction of the J5 \\ \midrule
+SET x\newline
+STORE\newline
+SET x\newline
 LOAD
-\end{lstlisting} &
-\begin{lstlisting}^^J
-DUP^^J
-SET x^^J
+&
+DUP\newline
+SET x\newline
 STORE
-\end{lstlisting} &
+&
 A store followed by an immediate load of the same value. Instead, duplicate the
 stored value and just store (since it might be used elsewhere) \\ \midrule
-\begin{lstlisting}^^J
-DUP^^J
+DUP\newline
 SWAP
-\end{lstlisting} &
-\begin{lstlisting}^^J
+&
 DUP
-\end{lstlisting} &
+&
 Removes redundant swap \\ \midrule
-\begin{lstlisting}^^J
-SWAP^^J
+SWAP\newline
 SWAP
-\end{lstlisting} &
-\begin{lstlisting}^^J
+&
 <NOP>
-\end{lstlisting} &
+&
 Removes redundant swaps \\ \midrule
-\begin{lstlisting}^^J
-SET x^^J
+SET x\newline
 DROP
-\end{lstlisting} &
-\begin{lstlisting}^^J
+&
 <NOP>
-\end{lstlisting} &
+&
 Removes unused stack usage \\ \bottomrule
 \end{tabularx}
 \end{table}
 
 \subsection{Stack scheduling}
-Stack scheduling was simple to implement and is described in pseudocode by
+Stack scheduling is simple to implement and is described in pseudocode by
 Listing~\ref{lst:schedule}.
 
 \begin{lstlisting}[caption={Stack scheduling
@@ -375,14 +364,14 @@ For (i, j) in pairs
 end
 \end{lstlisting}
 
-The key to the instruction that needs to be inserted at the ``reuse'' point to
-bring the instruction to the top of the stack depends on how many values have
+The key to which instruction needs to be inserted at the `reuse' point to bring
+the inserted instruction to the top of the stack depends on how many values have
 been added by instructions between its store point and its reuse point. This can
 be determined statically as all instructions have a known behaviour (whether
 they remove or add values to the stack).
 
 An example of what this algorithm produces is listed in
-Table~\ref{tab:scheduleex}. It's worth noting that even though the stack code
+Table~\ref{tab:scheduleex}. It is worth noting that even though the stack code
 produced by the stack scheduling is only 3 instructions shorter, it only
 contains 6 memory read/writes, compared to 10 for the initial unoptimised stack
 code which is a 40\% reduction.
@@ -390,8 +379,7 @@ code which is a 40\% reduction.
 \begin{table}
 \caption{Stack scheduling example}
 \begin{tabular}{c c c}\label{tab:scheduleex}
-  Original register code & Initial stack code & Stack scheduled code
-  \\ \toprule
+Original register code & Initial stack code & Stack scheduled code \\ \toprule
 \begin{lstlisting}
 ; b = a + c
 SET A, 23
@@ -453,11 +441,11 @@ STORE
 \end{table}
 
 Due to the na{\"\i}vity of how the blocks are determined (splitting on labels),
-if a loop doesn't have any labels that segment the code that follows the end of
+if a loop does not have any labels that segment the code that follows the end of
 the loop, it will also be included in the block.  This causes issues with the
-stack-scheduling optimiser as it may find pairs of STORE/LOAD which are actually
-outside the block. For the purposes of this project, an (unused) label at the
-actual logical end of the block.
+stack-scheduling optimiser as it may find pairs of \texttt{STORE}/\texttt{LOAD}
+which are actually outside the block. For the purposes of this project, an
+(unused) label at the actual logical end of the block.
 
 \section{Overall structure}
 The overall structure of how the translator performs is shown in
@@ -469,7 +457,7 @@ interpret the instruction in the register language. While this implementation
 can interpret the register code, it cannot switch between that and translating
 in a single run. This diagram also shows the control flow for the optimisation
 patterns which Transmeta's diagram lacks. Similarly to the Transmeta diagram, it
-also doesn't show the end condition of the Interpreter/Translator combination,
+also does not show the end condition of the Interpreter/Translator combination,
 when the program counter reaches the end of the program, or an unrecoverable
 fault occurs.
 
@@ -523,31 +511,17 @@ fault occurs.
 
 
 \section{Test implementations}
-Several simple benchmark programs were written in the source DCPU-16
-architecture for the purpose of showing the effectiveness of the optimisation
-algorithms. First was an implementation of bubble sort that sorted 32 16-bit
-numbers, one of the more complex programs, having nested loops. Next was a
-Fibonacci program that output the first 20 numbers in the Fibonacci sequence.
-This was the simplest program, with a single loop. A prime calculator was next,
-which used a prime sieve to find all the prime numbers up to 100. Whilst it had
-similarly nested loops like the bubble sort program, it was implemented in a way
-such that the loops were actually separated out in the program, so that it
-branched a lot more than it would have done otherwise. Lastly there was the
-triangle number calculator, which calculated the first 100 triangle numbers
-($T_{n} = n(n+1)/2$). The contents of these programs can be seen in
-Appendix~\ref{ch:benchmarkprograms}.
 
-For getting results out, the programs would have to be converted several times
-with various different commandline flags for the register vs stack conversion
-and for the different optimisation levels. For this a simple `test harness' was
-written in Python, which looped through all the programs, generating the correct
-flags for running them, and ran them, capturing their outputs. First check was
+For getting results out, the programs have to be converted several times with
+various different commandline flags for the register vs stack conversion and for
+the different optimisation levels. For this a simple `test harness' has been
+written in Python, which loops through all the programs, generating the correct
+flags for running them, and runs them, capturing their outputs. First check is
 to check the equality of the converted code output with the output of the
 standard register emulator. This check would not suffice if both emulators were
-incorrect, but in practice checking `by eye' was satisfactory. Then the register
-code was converted with each level of optimisation and the output of which is
-captured and parsed. The emulator was writing in such a way that at a certain
-debug level it would include every instruction that had been run, or information
-about instruction caching. After some pattern matching on this output was done,
-numerical results were obtained.
-
+incorrect, but in practice checking `by eye' was satisfactory to cover that
+eventuality. Then the register code is converted with each level of optimisation
+and the output of which is captured and parsed. The emulator has been written in
+such a way that at a certain debug level it includes every instruction that has
+been run, or information about instruction caching. After some pattern matching
+on this output, numerical results are obtained.

@@ -19,51 +19,52 @@ laying out the components of a computer prevailed, and the approximate idea is
 still used in modern processors today.
 
 \subsection{Register machines}
+
 In the 1950s, logic gates and switches were largely implemented using the quite
 large vacuum tubes and discrete transistors. With technology improving,
 integrated circuits were invented, constructing logic components using layers of
 metal and oxides on polished silicon. Initially, these were only used to
 implement individual logic components for computers, replacing the diodes and
 resistors used before, until in 1971, Intel released the 4004 microprocessor
-(Figure~\ref{fig:4004}).
-It was the first commercially available fully self contained microprocessor,
-with its circuitry fabricated using the new `silicon gate' technology which is
-why it was able to be designed and fabricated as one chip. However, Intel as a
-company did not have much faith in this product, opting to instead focus on its
-line of memory chips and partnering with a Japanese electronic calculator firm,
-Busicom, to help finance the project. Nonetheless, the 4004 was a huge
-commercial success with 4004 being produced for 10 years and taking Intel to the
-giant in the computing world that it is today~\cite{Aspray1997Intel}.
+(Figure~\ref{fig:4004}). It was the first commercially available fully
+self-contained microprocessor, with its circuitry fabricated using the new
+`silicon gate' technology which is why it was able to be designed and fabricated
+as one chip. However, Intel as a company did not have much faith in this
+product, opting to instead focus on its line of memory chips and partnering with
+a Japanese electronic calculator firm, Busicom, to help finance the project.
+Nonetheless, the 4004 was a huge commercial success being produced for 10 years
+and helping take Intel to the giant in the computing world that it is
+today~\cite{Aspray1997Intel}.
 
 \begin{figure}
   \includegraphics[width=0.5\textwidth]{imgs/Intel_C4004}
   \caption{Intel's 4004 microprocessor}\label{fig:4004}
 \end{figure}
 
-Very simply, register architectures work by having several named locations
-(sometimes called the register file) within the CPU (Central Processing Unit)
-providing the fastest way to access data in a system, often in a single CPU
-cycle, and are used to store and retrieve intermediate results of computations.
-There are a number of different types of register, with data registers storing
-numerical values, address registers storing memory addresses for accessing
-system memory, general purpose registers store both data and addresses, flag
-registers for storing states of previous Boolean (true or false) test
-operations, and various others. There's also often an instruction register that
-isn't accessible to the program running on the CPU, but the CPU uses to refer to
-the current instruction being
+In their simplest form, register architectures work by having several named
+locations (sometimes called the register file) within the CPU (Central
+Processing Unit) providing the fastest way to access data in a system, often in
+a single CPU cycle, and are used to store and retrieve intermediate results of
+computations. There are a number of different types of register, with data
+registers storing numerical values, address registers storing memory addresses
+for accessing system memory, general purpose registers store both data and
+addresses, flag registers for storing states of previous Boolean (true or false)
+test operations, and various others. There is also often an instruction
+register that is not accessible to the program running on the CPU, but the CPU
+uses to refer to the current instruction that is being
 executed~\cite{Mittal2016RegisterFile}\cite{Patterson2011Computer}.
 
 In register-based computing, there are two different competing architecture
 types, Reduced Instruction Set Computers (RISC) and CISC (Complex Instruction
 Set Computers). The RISC design uses the idea that a simple instruction set
 enables a simpler microprocessor design, which can then run more instructions
-per instruction cycle as a result. There's no formal definition of what
+per instruction cycle as a result. There is no formal definition of what
 consitutes a RISC processor, but the general trend is that they have a single
 instruction per type of operation, e.g.\ only having `\texttt{load}' and
 `\texttt{store}' for memory accesses, rather than another instruction being able
 to load or store to memory. Examples of RISC architectures include ARM, PowerPC
 and SPARC\@. In recent years, the most powerful supercomputers have also taken
-to using RISC processors, such as the `K Computer' which makes use of a
+to using RISC processors, such as the `K Computer' which made use of a
 processor from the SPARC family~\cite{Yokokawa2011KCJ}.
 
 CISC designed processors are opposite in this regard, providing instructions
@@ -73,10 +74,11 @@ instruction may be able to read from memory, perform the addition, and write
 back to memory automatically. There are often several instructions provided that
 implement the same operation, but take different types of operands (i.e.\
 registers, constants or memory addresses). Examples of CISC architectures
-include IBM's System/360 and related mainframe architectures, the Z80 and the
-now ubiquitous x86 series of processors~\cite{Patterson1980CRI}.
+include IBM's System/360 and related mainframe architectures, the Zilog Z80 and
+Intel's now ubiquitous x86 series of processors~\cite{Patterson1980CRI}.
 
 \subsection{Stack machines}
+
 The use of stacks as part of computation has been around almost as long as
 computing itself, with Zuse's Z4 making use of them for subroutines in
 1945~\cite{Speiser2000KZZ}, and the Burroughs B5000 and its later models were
@@ -103,13 +105,12 @@ branching).
 
 In the present day, the use of stacks in computer architectures and instruction
 sets is nearly exclusively limited to stack frames, to give the ability to do
-context `saving' and `loading' with function calls, in favour of register based
+context `saving' and `loading' with function calls, in favour of register-based
 computation. However, there is a notable exception --- the Java Virtual Machine
 (JVM) uses a stack-based bytecode as its underlying assembly language and
 virtual machine design~\cite{Schoeberl2005Design}.
 
 \section{Stack optimisations}
-
 Because of the popularity of register architectures, higher-level languages tend
 to get designed with them particularly in mind. This means that the majority of
 optimisation research for these languages gets done only for register
@@ -123,11 +124,13 @@ memory location that na{\"\i}ve compilation tends to produce.
 
 Peephole optimisations are a method that can be applied to register and stack
 architectures alike, with the effect of removing redundant instructions from
-compiled code. McKeeman~\cite{McKeeman1965Peephole} gives this name to this
+compiled code. McKeeman~\cite{McKeeman1965Peephole} gave this name to this
 optimisation technique as it involves looking at small sections of the generated
 object code, identifying inefficient instruction segments and modifying them
-accordingly to generate more efficient or shorter code. McKeeman uses ALGOL to
-give an example where an assignment is followed by an addition. \newline
+accordingly to generate more efficient or shorter code. McKeeman used ALGOL to
+give an example where an assignment is followed by an addition.
+
+\vspace{2ex}
 
 \begin{minipage}{.25\textwidth}
   \centering
@@ -147,10 +150,11 @@ STA Z ; store the accumulator in Z
   \end{lstlisting}
 \end{minipage}
 
-As long as the the store (\lstinline{STA X}) operation is nondestructive, the
+As long as the store (\lstinline{STA X}) operation is nondestructive, the
 subsequent \lstinline{LDA X} is unnecessary and can be removed. Peephole
-optimisations such as this one generally make assumptions about which
-instructions are expensive and should be replaced if possible. For example, for
+optimisations such as this one generally make assumptions based on the specific
+architecture about which
+instructions are expensive and should be replaced. For example, for
 stack machines a `\texttt{DUP}' on the stack is generally much faster than a
 `\texttt{LOAD}' from memory. Another common peephole optimisation is `constant
 collapsing', where the compiler can compute the result of an arithmetic
@@ -162,15 +166,15 @@ code elsewhere may be relying on.
 One major area of interest of stack optimisations is the concept of stack
 scheduling, i.e.\ separating the code into blocks and optimising them by
 removing extra memory accesses so that they can be executed concurrently.
-Baker~\cite{Baker1991Stack} applies the concept to realtime systems, which have
+Baker~\cite{Baker1991Stack} applied the concept to real-time systems, which have
 deadlines with which they have to have completed their computation by, which has
 potentially disastrous results if they do not.
 
 Koopman~\cite{Koopman1995Preliminary} describes a method of optimisation of
 (generated) stack code that is able to remove 91\% to 100\% of redundant local
-variable accesses. This is achieved in 4 optimisation steps, in addition to the
-input processing, basic register to stack conversion that begin the process and
-the code generation that ends it. The code conversion step uses local stack
+variable accesses. This is achieved in four optimisation steps, in addition to
+the input processing, basic register to stack conversion that begin the process
+and the code generation that ends it. The code conversion step uses local stack
 variables to replace registers, and also takes note of the parts of the code
 which are set and then never reused, marking them as `DEAD'.  Next is a `code
 cleanup', which makes more use of the stack, converting from the local
@@ -183,7 +187,7 @@ This is finished with another peephole optimisation pass to clean up some
 redundancy produced by the stack scheduling. The end result is a quite
 significant optimisation of generated stack code.
 
-Following on from this, Bailey~\cite{Bailey2000Inter} goes further and describes
+Following on from this, Bailey~\cite{Bailey2000Inter} went further and described
 an algorithm that can optimise memory accesses across block boundaries. This
 algorithm works out which memory locations are used in adjacent `parent-child'
 (i.e.\ loops) blocks and duplicating them on the stack, rather than doing the
@@ -197,12 +201,12 @@ algorithms, and came up with his own `global register' optimisations. These are
 an iteration on top of Bailey's algorithm in that it analyses the data-flow of
 the program (rather than just a region) and works out which registers are used
 where, pushing that data to the stack where possible. Shannon's results also
-show how different memory models can affect the performance of (optimised) stack
-code by varying the costs of different instructions.
+showed how different memory models can affect the performance of (optimised)
+stack code by varying the costs of different instructions.
 
 \section{Binary Translation}
 
-Gschwind et.\ al.~\cite{Gschwind2000BinaryTranslation} describe the design
+Gschwind et.\ al.~\cite{Gschwind2000BinaryTranslation} described the design
 issues they experienced when implementing a binary translator for IBM's ESA/390
 architecture, for their mainframes, to a VLIW processor to improve performance.
 The primary difficulties experienced were due to the source CISC architecture's
@@ -235,27 +239,27 @@ of repair, and also for use in error correction~\cite{Mattos1990Transputer}.
 
 \subsection{Transmeta Crusoe}
 In 2000, Transmeta\cite{TransmetaCodeMorph} published a paper detailing their
-new Crusoe microprocessor. This is a VLIW (Very Long Instruction Word)
+new Crusoe microprocessor. This was a VLIW (Very Long Instruction Word)
 processor --- an architecture type designed to be used for instruction-level
 parallelism, where instructions can be executed concurrently without the extra
 complexity required by other processor designs. Using this processor, Transmeta
-were able to completely implement the x86 instruction set and its registers in
-software running on the processor. Because this is implemented in software,
-acting as a layer between the hardware and the programs running on it, it makes
+was able to completely implement the x86 instruction set and its registers in
+software running on the processor. Because this was implemented in software,
+acting as a layer between the hardware and the programs running on it, it made
 it possible to completely change the internal workings of the translation
 software and the underlying hardware, all invisibly to the x86 code running on
 the processor.
 
-Transmeta's translation software (`Code Morphing Software' or CMS) is structured
-as a dynamic translator in that it first does sequential interpretation of the
-x86 instructions, being careful to replicate all side-effects such as interrupts
-and memory access ordering. While doing this, it collects information on the
-instructions running on it, for example how often particular instructions are
-executing, what IO operations are performed, and which direction branches take.
-This monitoring allows the CMS to selectively take often-run sections of x86
-code and translate them into native VLIW code, which is then stored in the
-`translation cache' for future lookup and use, as seen in the flow chart in
-Figure~\ref{fig:cmsctrlflow}.
+Transmeta's translation software (`Code Morphing Software' or CMS) was
+structured as a dynamic translator in that it first did sequential
+interpretation of the x86 instructions, being careful to replicate all
+side-effects such as interrupts and memory access ordering. While doing this, it
+collected information on the instructions running on it, for example how often
+particular instructions were executed, what IO operations are performed, and
+which direction branches took.  This monitoring allowed the CMS to selectively
+take often-run sections of x86 code and translate them into native VLIW code,
+which was then stored in the `translation cache' for future lookup and use, as
+seen in the flow chart in Figure~\ref{fig:cmsctrlflow}.
 
 \begin{figure}
   \begin{tikzpicture}[node distance=3cm, on grid, auto, >=stealth, thick,
@@ -299,24 +303,19 @@ Figure~\ref{fig:cmsctrlflow}.
 \label{fig:cmsctrlflow}
 \end{figure}
 
-The novel approach here is the Translation Threshold --- code sections are only
-translated into native code when they hit a certain execution threshold. This
-prevents too much time being spent on translating, which is an expensive
+The novel approach here was the Translation Threshold --- code sections were
+only translated into native code when they hit a certain execution threshold.
+This prevented too much time being spent on translating, which was an expensive
 operation, instead of executing the code. Programs often only have a few
 bottlenecks in its code; by identifying the commonly run code, the Transmeta CMS
-can remove these bottlenecks.
+could remove these bottlenecks.
 
 Transmeta also built several error handling routines into their processor, which
 a combination of hardware and software being used to detect and handle various
 forms of failing assumptions, e.g.\ assuming that two code sections reference
-non-overlapping memory. In the case of infrequent failures the CMS switches to
-the x86 interpreter rather than the translated code which, while slower, is
+non-overlapping memory. In the case of infrequent failures the CMS switched to
+the x86 interpreter rather than the translated code which, while slower, can be
 guaranteed to be correct.
-
-\begin{figure}
-  \includegraphics[width=0.5\textwidth]{imgs/Transmeta_TM5600}
-  \caption{The Transmeta TM5600 CPU from a Fujitsu laptop}
-\end{figure}
 
 However, Transmeta quickly ran into issues with the Crusoe processor, with slow
 performance in real world tests and even accusations of cheating benchmarks to
@@ -337,9 +336,15 @@ even if it only required a single byte, and also was not enough cache to hold
 both the CMS and the translated code, causing excessive memory thrashing.
 
 Attempting to address these concerns, Transmeta developed a new processor, the
-efficeon, that addressed many of the concerned raised about the Crusoe, but even
+Efficeon, that addressed many of the concerned raised about the Crusoe, but even
 with its 256-bit wide instruction word, die size twice as large as its
 predecessor and doubled clock speed, it still had performance issues compared to
 contemporary processors and even often thermal throttling itself in
 benchmarking, so failed to make any significant impact in the computing
 world~\cite{TrackingTransmetaEfficeon}.
+
+\begin{figure}
+  \includegraphics[width=0.5\textwidth]{imgs/Transmeta_TM5600}
+  \caption{The Transmeta TM5600 CPU from a Fujitsu laptop}
+\end{figure}
+

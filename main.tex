@@ -1,7 +1,7 @@
 \documentclass[11pt,a4paper,notitlepage]{report}
 \usepackage[british]{babel} % British hyphenation patterns, etc.
 \usepackage{csquotes}
-\usepackage{capt-of} % captionof
+\usepackage[titletoc]{appendix}
 \usepackage[T1]{fontenc}
 \usepackage{fontspec}
 \usepackage[final]{microtype}
@@ -12,13 +12,13 @@
 \usepackage{fancyvrb} % VerbatimInput
 \usepackage{tabularx}
 \usepackage{multirow}
+%\usepackage[toc]{multitoc}
 \usepackage{booktabs} % top/midrule
 \usepackage{graphicx}
 \usepackage{floatrow}
 \usepackage{float}
 \usepackage{enumitem} % noitemsep
 \usepackage{tikz}
-\usepackage{pgfplots}
 \usepackage{pgfplotstable}
 \usetikzlibrary{chains,shapes,arrows,positioning,backgrounds}
 \pgfplotsset{compat=1.14}
@@ -42,21 +42,21 @@
 % Titlepage formatting
 \pretitle{\begin{center}\Huge\bfseries}
 \posttitle{\par\end{center}\vspace{0.5em}}
-\preauthor{\begin{center}\Large\ttfamily}
-\postauthor{\par\large\supervisor\end{center}}
+\preauthor{\begin{center}\Large}
+\postauthor{\par\large\texttt{\supervisor}\end{center}}
 \predate{\par\large\centering}
-\postdate{\par\wordcount\par}
+\postdate{\par\par}
 
+\newcolumntype{L}{>{\ttfamily\arraybackslash}p{6em}}
 
 % Magic hackery to automaticly generate the word count
 \immediate\write18{texcount \jobname.tex -inc -1 -sum -out=wordcount.txt}
-\newcommand\wordcount{\small(\input{wordcount.txt}words, counted by
-\ttfamily{texcount})}
+\newcommand\wordcount{\input{wordcount.txt}\unskip}
 
 \title{Binary Code Translation from Register to Stack based code}
 \author{Charles Pigott}
 \date{\today}
-\newcommand\supervisor{Supervisor: Christopher Crispin-Bailey}
+\newcommand\supervisor{Supervisor: Dr.\ Christopher Crispin-Bailey}
 
 \begin{document}
 
@@ -64,26 +64,25 @@
 
 %TC:group lstlisting 0 0
 \begin{abstract}
-  Transmeta are a US based company, who recently surprised the computer
-  architecture world by developing a chip which dynamically translates Intel
-  binary code into machine language instructions for another (highly optimised
-  RISC) CPU core. In doing so it allows Intel code to execute in real-time
-  without recompilation, but using a (claimed) much more power-efficient
-  processor architecture.
-
-  This project explores something related to the above experiment. However the
-  focus is on translating code to a stack-based architecture and applying
-  optimisation techniques to the produced instructions, using a technique called
-  stack-scheduling. Research focuses on the history of register and stack-based
-  computing, and previous work on stack optimisation techniques. A combined
-  translator and interpreter for running register code on a stack machine is
-  designed and implemented (\texttt{https://github.com/LordAro/reg2stack}).
-  Several different optimisation models implemented by the software are then
-  tested and the results of which are evaluated.
+This project explores something related to the above experiment. However the
+focus is on translating code to a stack-based architecture and applying
+optimisation techniques to the produced instructions, using a technique called
+stack-scheduling. Research focuses on the history of register and stack-based
+computing, and previous work on stack optimisation techniques. A combined
+translator and interpreter for running register code on a stack machine is
+designed and implemented (\texttt{https://github.com/LordAro/reg2stack}).
+Several different optimisation models implemented by the software are then
+tested and the results of which are evaluated.
 \end{abstract}
+
+\vfill
+
+\small{The main body of the report (excluding the appendices) is
+\wordcount~words, counted by \texttt{texcount}}
 
 \cleardoublepage%
 
+\normalsize
 \tableofcontents
 
 \input{01-introduction}
@@ -98,7 +97,8 @@
 \clearpage
 
 %TC:ignore
-\appendix
+\begin{appendices}
 \include{99-appendices}
+\end{appendices}
 %TC:endignore
 \end{document}

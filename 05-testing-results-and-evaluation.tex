@@ -1,28 +1,34 @@
 \chapter{Testing, Results and Evaluation}\label{ch:testingresults}
 \section{Testing}
 
-Due to the emulated nature of the implementation of this project, testing will
-focus on the instructions of the original register-based programs and stack
+Due to the emulated nature of the implementation of this project, testing
+focuses on the instructions of the original register-based programs and stack
 programs that they produce, at all levels of optimisation --- no optimisations,
 peephole optimisations, and stack-scheduling.
 
-The results will be looking to find the relationship between the number of
-register instructions to generated instructions, so that the effect of each
-optimising level can be assessed. Further attention will be paid to the number
-of memory accesses made by the stack program, as stack-scheduling is supposed to
-be able to significantly reduce redundant memory accesses produced by emulating
+The results look to find the relationship between the number of register
+instructions to generated instructions, so that the effect of each optimising
+level can be assessed. Further attention is paid to the number of memory
+accesses made by the stack program, as stack-scheduling is supposed to be able
+to significantly reduce redundant memory accesses produced by emulating
 registers as memory.
 
 Using a simple memory model, a basic figure for ``program cost'' can be
-produced. While there will be no equivalent available for the source
-register-based programs, it will be beneficial to see the difference between
-each optimisation level. The memory model can also be used to measure the effect
-of the translation cache, by giving the conversion and caching of the register
-code an (estimated) high cost, to simulate the effects of not having to
-convert heavily-used loops many times over.
+produced. While there is no equivalent available for the source register-based
+programs, it is beneficial to see the difference between each optimisation
+level. The memory model is also used to measure the effect of the translation
+cache, by giving the conversion and caching of the register code an (estimated)
+high cost, to simulate the effects of not having to convert heavily-used loops
+many times over.
 
-Testing will be done using a series of programs handwritten for the DCPU-16
+Testing is done using a series of programs handwritten for the DCPU-16
 emulator. For testing purposes, simple test programs (called \texttt{simple},
+\texttt{loop} and \texttt{redundant}) were created only to test compiler
+correctness and were not used for benchmarking.
+
+Several simple benchmark programs have been written in the source DCPU-16
+architecture for the purpose of showing the effectiveness of the optimisation
+algorithms. For testing purposes, simple test programs (called \texttt{simple},
 \texttt{loop} and \texttt{redundant}) were created only to test compiler
 correctness and were not used for benchmarking.
 
@@ -34,7 +40,7 @@ programs should also use a wide variety of register instructions to achieve
 better coverage of the translator and emulators.
 
 A common set of tests used for these type of the programs is the Standford
-Benchmark Suite\cite{stanford}. It's a set of programs written in C that are
+Benchmark Suite\cite{stanford}. It is a set of programs written in C that are
 fairly short in code and execution time. It also has the advantage of not
 requiring any input, which both the source DCPU-16 and J5 instruction sets lack.
 Examples of programs in it include bubble sort, Tower of Hanoi and a matrix
@@ -42,9 +48,9 @@ multiplication.
 
 However, since the implementation in this project lacks any sort of subroutine
 or function support, many of the programs would be quite difficult to feasibly
-implement. With that in mind, a different set of benchmarks was created. Given
-more time, further benchmarks would have been created so as to produce more
-raw data, for better results.
+implement. With that in mind, a different set of benchmarks have been created.
+Given more time, further benchmarks would have been created so as to produce
+more raw data, for better results.
 
 \begin{itemize}[noitemsep]
   \item \texttt{bsort} --- Bubble sort benchmark. Sorts 32 integers and prints
@@ -56,16 +62,18 @@ raw data, for better results.
     addition formula
 \end{itemize}
 
-With the above in mind, the above four programs were written in DCPU-16
-assembly. They were chosen as reasonable examples that cover a range of
-mathematical functions but in particular they vary in their use of loops, which
-is the primary target of the optimisations, stack-scheduling especially. Their
-contents can be seen in full in Appendix~\ref{ch:benchmarkprograms}. Notably,
-\texttt{fib20} and \texttt{tri100} are similar in that they don't branch very
-much, they essentially have a single loop and stay within it. The \texttt{bsort}
-program is made up of several nested loops, as is \texttt{primes}, however it is
-written in such a way that the loops are not nested within the code, which makes
-it jump around a lot more.
+The bubble sort program, \texttt{bsort}, is an implementation of bubble sort
+that sorts 32 16-bit numbers. It is one of the more complex programs with it
+having nested loops. A prime calculator, \texttt{primes}, uses a prime sieve to
+find all the prime numbers up to 100. Whilst it has similarly nested loops to
+\texttt{bsort}, it is implemented in a way such that the loops are logically
+separated out in the program, so that it branches a lot more than it would have
+done otherwise. A Fibonacci program, \texttt{fib20}, outputs the first 20
+numbers in the Fibonacci sequence. This is the simplest benchmark program, only
+branching within a single loop. Similarly there is a triangle number calculator,
+\texttt{tri100}, that calculates the first 100 triangle numbers
+($T_{n} = n(n+1)/2$). The contents of these programs can be seen in
+Appendix~\ref{ch:benchmarkprograms}.
 
 \section{Results}
 
@@ -370,9 +378,9 @@ primes,19615,19516,18978,11981,11882,11344
 tri100,202089,197040,186942,192583,187534,177436
 }\costdata%
 
-\begin{figure}
+\sloppy\begin{figure}
   \begin{tikzpicture}
-    \begin{axis}[relative graph,bar width=0.25cm,ymin=0]
+    \begin{axis}[relative graph,bar width=0.25cm,ymin=0,width=11.5cm]
       \addplot table [relative series=1] {\costdata};
       \addplot table [relative series=4] {\costdata};
       \addplot table [relative series=2] {\costdata};
@@ -391,12 +399,13 @@ Table~\ref{tab:memmodel}. The two tables are represented in
 Figure~\ref{fig:progcost}.
 
 \section{Evaluation}\label{sec:testingevaluation}
+
 The basic results (seen in Table~\ref{tab:instructions} and
 Figure~\ref{fig:relativeinstructions}) are somewhat counter-intuative, showing
 that the peephole optimisation stage does the bulk of the the overall executed
 instruction count reduction and that Koopman-style stack scheduling has very
 little effect.However, looking at the number of memory reads and writes (with
-\lstinline{LOAD} and \lstinline{STORE} respectively) in
+the `\texttt{LOAD}' and `\texttt{STORE}' instructions respectively) in
 Table~\ref{tab:meminstructions} (and visualised in
 Figure~\ref{fig:relativememinstructions}) shows a different result, with stack
 scheduling doing as much reduction as peephole optimisation if not more,
@@ -408,13 +417,13 @@ While the optimisation results are also good (around 30\% reduction in memory
 usage is quite substantial), making it appear as though they are not the same as
 what Koopman~\cite{Koopman1995Preliminary} achieved in his original paper, being
 able to remove 90--100\% of redundant local variable accesses. The results here
-are not quite the same measurement, but it seems reasonable to assume as such.
-The actual number of redundant memory accesses is quite hard to programatically
-calculate, and Koopman did it by studying the program's output by hand. A
-reasonable explanation is that the limited set of benchmark programs prevents a
-statistically significant result and other benchmark programs would have more
-opportunities for stack scheduling than the programs presented here. The
-programs used here have fairly short loops or regions (in number of
+are not exactly the same measurement, but it seems reasonable to assume them to
+be comparable. The actual number of redundant memory accesses is quite hard to
+programatically calculate, and Koopman did it by studying the program's output
+by hand. A reasonable explanation is that the limited set of benchmark programs
+prevents a statistically significant result and other benchmark programs would
+have more opportunities for stack scheduling than the programs presented here.
+The programs used here have fairly short loops or regions (in number of
 instructions) naturally making lots of reuse of variables less likely than
 otherwise.
 
@@ -436,7 +445,7 @@ show the relationship of register instructions to stack instructions quite well,
 with one register instruction generating between 4 and 5 stack instructions
 depending on the optimisation level. The memory accesses are even more
 interesting, with Koopman's stack scheduling getting the ratio of register
-instructions to memory accesses down to just over one. It would be reasonable to
+instructions to memory accesses down to just over one. It is reasonable to
 conclude then that the stack-scheduling does in fact remove many of the
 unnecessary memory accesses. Contrary to the conclusions of
 Figures~\ref{fig:relativeinstructions} and~\ref{fig:relativememinstructions} as
@@ -477,34 +486,37 @@ advanced step would be to vary the produced stack code depending on its
 contents, i.e.\ if a particular group of register instructions could be replaced
 with something simpler than the `standard' generated code. A simple example of
 that in this project is the peephole optimisation done on converting \texttt{SET
-1} and \texttt{ADD} instructions to an \texttt{INC} instruction. It's not done
+1} and \texttt{ADD} instructions to an \texttt{INC} instruction. It is not done
 at the initial translation and the register instruction set lacks a similar
 instruction.
 
 \subsection{Completion of requirements}
-All key features of the project were completed, but only one of the desirable
-features was able to be partially implemented, largely due to time constraints.
+
+All key features of the project have been completed, but only one of the
+desirable features has been able to be partially implemented, largely due to
+time constraints.
 
 Requirements~\ref{itm:register} and~\ref{itm:stack} (implementing the emulators)
-were both fully implemented, with working parsers for their respective assembly
-languages and able to interpret and execute any program in that language, with a
-fully implemented instruction set.  Code generation was also fully implemented
-(Requirement~\ref{itm:generate}) that was free of side effects.  The two key
-optimisation methods (Requirement~\ref{itm:optimise}) were also implemented,
-including commandline flags to enable/disable them when required (similarly to
-optimise flags in C++ compilers) These flags were used to get several sets of
-results (Requirement~\ref{itm:results}) focusing on length of generated code
-with each optimisation level and the number of memory accesses they did.
+have both been fully implemented, with working parsers for their respective
+assembly languages and able to interpret and execute any program in that
+language, with a fully implemented instruction set. Code generation is also
+fully implemented (Requirement~\ref{itm:generate}) that was free of side
+effects. The two key optimisation methods (Requirement~\ref{itm:optimise}) have
+also been implemented, including commandline flags to enable/disable them as
+required (similarly to optimise flags in C++ compilers) These flags have been
+used to get several sets of results (Requirement~\ref{itm:results}) focusing on
+length of generated code with each optimisation level and the amount of memory
+accesses.
 
 Unfortunately, the additional requirements (notably
-Requirements~\ref{itm:moreoptimise} and~\ref{itm:visualise}) were not able to be
-implemented, largely due to time constraints on the project. While the tool did
-have various debugging levels for which to get output out of, the interface was
-rather crude and the data output needed some transformations (using a python
-testing interface and \texttt{grep}) to get meaningful results out of, so it
-would've been preferrable to have a user interfaces for collecting data from.
-However, there was partial completion of Requirement~\ref{itm:caching}, in that
-each converted block was cached, but there was no concept of a `threshold' at
+Requirements~\ref{itm:moreoptimise} and~\ref{itm:visualise}) have not been able
+to be implemented, largely due to time constraints on the project. While the
+tool does have various debugging levels with which to get output out of, the
+interface is rather crude and the data output needs some transformations (using
+a Python testing interface and \texttt{grep}) to get meaningful results out of,
+so it would be preferrable to have a user interface for collecting data from.
+However, there has been partial completion of Requirement~\ref{itm:caching}, in
+that each converted block is cached, but there is no concept of a `threshold' at
 which to convert them. This would have been useful as the expense of converting
 and caching the initalisation routines (that set all the input data) is likely
 too much compared to just running them, bringing up the `program cost' of the
@@ -513,20 +525,20 @@ convert and cache loops that are executed lots of times.
 
 \subsection{Program correctness}
 No significant automated testing of the implementation has been done. Instead
-the program's output was verified ``by eye'' and for the test run the multiple
-executions were compared against each other, to ensure consistent results.
+the program's output is only verified `by eye' and for the test run the multiple
+executions are compared against each other, to ensure consistent results.
 
 \subsection{Code quality}
 The code itself is fairly extensible for future work. It is published as
 open-source software at \texttt{github.com/LordAro/reg2stack} enabling any
 future work to be able to be built on top of this software. The peephole
-optimsation implementation allows for easy additions --- just add the relevant
-function and add the function name to the list of existing functions.
+optimisation implementation allows for easy additions --- just add the relevant
+function and add the function name to the existing list of functions.
 
 Documentation of the code could definitely be improved. While the complicated
 sections of code generally has comments explaining exactly why it does what it
-does, it's by no means complete and more code could benefit from comments. Many
+does, it is by no means complete and more code could benefit from comments. Many
 functions are also missing `doc-comments', which generally take the form of
 comments above the function definition which can then be parsed by some external
-tool to generate more formal documentation. If this were expanded it would be
+tool to generate more formal documentation. If this were expanded, it would be
 really helpful to future work on the program.

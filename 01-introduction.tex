@@ -1,48 +1,57 @@
 \chapter{Introduction}\label{ch:introduction}
+\section{Background}
+Transmeta were a US based company, who in 2000 surprised the computer
+architecture industry by developing a chip which dynamically translates Intel
+binary code into machine language instructions for another (highly optimised
+RISC) CPU core. In doing so it allows Intel code to execute in real-time without
+recompilation, but using a (claimed) much more power-efficient processor
+architecture.
+
 \section{Aims}
-This project aims to show that by converting code written for a simple
-register-based architecture or processor to a stack-based architecture,
-performance improvements can be found. This will include an implementation of
-translating code intended for a register-based architecture to run on a
-stack-based architecture.
+The objective of this project is to show that by converting code written for a
+simple register-based architecture or processor to a stack-based architecture,
+performance improvements can be found. This includes an implementation that can
+translate code intended for a register-based architecture to run on a
+stack-based architecture. Testing the output of this implementation is intended
+to gain some performance related results and enable conclusions to be drawn from
+them.
 
 \section{Limitations}
 Sourcing physical processors and the toolchains capable of compiling and running
 code on both register-based and stack-based architectures is difficult, as
 existing systems tend to be either very out of date, with only partial support,
-or not exist on both platforms. As such, this project will seek to emulate the
-architectures instead.
+or not exist on both platforms. Because of this, the project seeks to emulate
+the architectures instead.
 
-Since the architectures will be emulated, there are precious few advantages to
+Since the architectures will be emulated, there are very few advantages to
 continuing to use the architecture's native binary code, so this project will
-instead take in some form of the respective architecture's assembly language.
+instead use the respective architecture's assembly language, rather than the
+binary code.
 
 \section{Statement of Ethics}
 This project has very few ethical concerns. This project only intends to
 implement already published work and show that their results are correct. In
-addition, Transmeta published results for their similar project nearly two
-decades ago with their Crusoe processor and have since closed down any
-microprocessor production operations and bought out, therefore any implications
-of the results of this project will be unlikely to have any further affect on
-any commercial businesses.  There is the case of transferring the ideas from
-this project to different architectures. The source architectures in this
-project will be fully evaluated for side effects, but changing to a different
-architecture might result in different results if not examined fully, depending
-on the architecture. This would cause issues for high-integrity software where
-correctness is crucial. The software produced by this project will be released
-under a permissive open-source licence once it is completed, should anyone else
-want to take the project any further.
+addition, Transmeta published results for their similar project over a decade
+ago with their Crusoe processor and have since closed down any microprocessor
+production operations and bought out, therefore any implications of the results
+of this project will be unlikely to have any further affect on any commercial
+businesses. There is the case of transferring the ideas from this project to
+different architectures. The source architectures in this project are fully
+evaluated for side effects, but changing to a different architecture may result
+in different results if not examined fully, depending on the architecture. This
+could cause issues for high-integrity software where correctness is crucial. The
+software produced by this project has been released under a permissive
+open-source licence now that it is completed, should anyone else want to take
+the project any further.
 
 \section{Problem approach}
-Initially, relevant literature will be reviewed, focusing on the work done by
+Initially, relevant literature is reviewed, focusing on the work done by
 Transmeta, but also covering computer architectures, code translation and stack
-optimisation (Chapter~\ref{ch:litreview}). The knowledge from this will be used
-to make a list of requirements for the implentation of the translation program
-(Chapter~\ref{ch:problemanalysis}). The program will then be designed and
+optimisation (Chapter~\ref{ch:litreview}). The knowledge from this is used to
+make a list of requirements for the implentation of the translation program
+(Chapter~\ref{ch:problemanalysis}). The program is then designed and
 implemented, documenting the problems and solutions found along the way
-(Chapter~\ref{ch:designimplementation}). Once the implementation is complete, it
-will be tested appropriately and results will be recorded and evalulated
-(Chapter~\ref{ch:testingresults}). Finally, conclusions will be drawn and
-options for any further work set out and discussed
-(Chapter~\ref{ch:conclusions}).
-
+(Chapter~\ref{ch:designimplementation}). The completed implementation is then
+tested appropriately and results recorded and evaluated
+(Chapter~\ref{ch:testingresults}). Finally, conclusions are drawn and options
+for any further work set out and discussed (Chapter~\ref{ch:conclusions}).
