@@ -1,0 +1,56 @@
+== intro ==
+
+good afternoon
+
+transmeta paper
+
+project focuses on something related to this, but using stack machine as a base processor instead of the RISC-type processor
+
+== literature ==
+
+register machines
+- risc vs cisc
+  - z80
+  - x86
+
+stack machines
+
+stack optimisations
+- peephole
+- stack-scheduling
+- bailey
+- shannon
+
+binary translation
+- ibm
+- transputer
+- more transmeta detail
+  - include diagram
+  - ultimately disappointing performance (cheating, crashing, etc)
+
+== implementation ==
+architectural choices
+- language
+- processor architectures
+- just state?
+
+program structure
+- diagram
+
+examples of optimisations
+
+cache
+
+== results ==
+
+graphs
+- relative instruction count
+- relative memory accesses count
+- mapping by block
+- program cost
+
+== conclusion ==
+
+summary/implications
+future
+
